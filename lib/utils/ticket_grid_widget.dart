@@ -51,6 +51,7 @@ class TicketGridWidget extends DataGridSource{
 
 
   void updateTickets(List<TicketResponse> tickets) {
+    tickets.sort((a, b) => b.id.compareTo(a.id)); // 🔥 от большего к меньшему
     _buildRows(tickets: tickets);
     notifyListeners();
   }
@@ -62,7 +63,8 @@ class TicketGridWidget extends DataGridSource{
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
     return DataGridRowAdapter(
-      cells: row.getCells().map((cell) {
+      cells: row.getCells()
+      .map((cell) {
         // Булевые поля — иконка
         if (cell.value is bool) {
           return Container(
@@ -84,7 +86,7 @@ class TicketGridWidget extends DataGridSource{
             style: const TextStyle(fontSize: 13),
           ),
         );
-      }).toList(),
+      }).toList()
     );
   }
 }

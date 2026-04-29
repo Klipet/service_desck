@@ -26,4 +26,5 @@ class AppColors{
     HexColor("#A4DA00"),
   ];
 
+  static final dataGreadColorTitle = HexColor("#446158");
 }
