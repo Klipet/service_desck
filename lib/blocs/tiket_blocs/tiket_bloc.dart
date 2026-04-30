@@ -26,8 +26,26 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
     });
 
     on<AddTicket>((event, emit) {
-      _tickets.add(event.ticket);
-      emit(TicketLoaded(List.from(_tickets))); // обновляем состояние
+      final current = state is TicketLoaded ? (state as TicketLoaded).tickets : [];
+      emit(TicketLoaded(
+        [...current, event.ticket],
+        isNewTicket: true,      // ✅
+        newTicket: event.ticket, // ✅
+      ));
+    });
+
+
+    on<AddComment>((event, emit) {
+      final current = state;
+
+      emit(CommentLoaded(event.ticketModel));
+
+      print("Я щас тут ${current.runtimeType}");
+      if (current is TicketLoaded) {
+        print("возвращаем список обратно ${current.runtimeType}");
+        emit(current); // 👈 возвращаем список обратно
+      }
     });
   }
+
 }

@@ -35,6 +35,7 @@ dependencies:
   google_fonts: ^8.0.2
   lottie: ^3.3.2
   window_manager: ^0.5.1
+  windows_notification: ^1.3.0
   fl_chart: ^1.2.0
 
 
@@ -44,6 +45,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   hive_generator: ^2.0.1
   build_runner: ^2.4.0
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -62,6 +64,7 @@ flutter:
    - assets/image/init_photo.svg
    - assets/image/wallpaper.png
    - assets/image/calendar.svg
+   - assets/image/big_logo.png
    - assets/image/nav_icons/logo.svg
    - assets/image/nav_icons/company.svg
    - assets/image/nav_icons/company_select.svg
@@ -103,3 +106,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  windows:
+    generate: true
+
+  image_path: "assets/image/big_logo.png"

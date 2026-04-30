@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:service_desk/const/const_colors.dart';
-import 'package:service_desk/screens/table_great/tiket_great_table.dart';
+import 'package:service_desk/screens/table_great_tickets/tiket_great_table.dart';
+
 import 'package:service_desk/services/user_service.dart';
 import 'package:signalr_netcore/hub_connection.dart';
 import 'package:signalr_netcore/hub_connection_builder.dart';
@@ -9,18 +10,20 @@ import 'package:signalr_netcore/hub_connection_builder.dart';
 import '../blocs/tiket_blocs/tiket_bloc.dart';
 import '../blocs/tiket_blocs/tiket_event.dart';
 import '../blocs/tiket_blocs/tiket_state.dart';
+import '../main.dart';
 import '../models/tikets_models/tiket_response.dart';
 import '../services/ticket_service.dart';
+import '../utils/ticket_grid_widget.dart';
 
 class AllTicketsScreen extends StatelessWidget {
   const AllTicketsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => TicketBloc(TicketService())..add(LoadTickets()),
-      child: AllTicketsScreenUI(),
-    );
+    // return BlocProvider(
+    //   create: (_) => TicketBloc(TicketService())..add(LoadTickets()),
+    return AllTicketsScreenUI();
+    //  );
   }
 }
 
@@ -32,22 +35,20 @@ class AllTicketsScreenUI extends StatefulWidget {
 }
 
 class _AllTicketsScreenUIState extends State<AllTicketsScreenUI> {
-  late HubConnection hubConnection;
   TicketResponse? _hoveredTicket;
   Offset _hoverOffset = Offset.zero;
   final ScrollController _scrollController = ScrollController();
 
+  TicketGridWidget? dataSource;
+
   @override
   void initState() {
     super.initState();
-    connectToSignalR();
-    //  context.read<TicketBloc>().add(LoadTickets());
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    hubConnection.stop(); // ← обязательно!
     super.dispose();
   }
 
@@ -62,36 +63,6 @@ class _AllTicketsScreenUIState extends State<AllTicketsScreenUI> {
       }
     });
   }
-
-  Future<void> connectToSignalR() async {
-    String apikey;
-    var userInfo = UserService.getUser();
-    apikey = userInfo?.apiKey ?? '';
-    print("🔄 Начинаем подключение..."); // ← первым делом
-    hubConnection = HubConnectionBuilder()
-        .withUrl("http://localhost:5000/ticketHub?access_token=$apikey")
-        .build();
-
-    print("🔄 HubConnection создан, запускаем..."); // ← перед start()
-
-    hubConnection.on("NewTicketCreated", (args) {
-      print("✅ Получен тикет: $args");
-      if (args != null && args.isNotEmpty) {
-        final ticket = TicketResponse.fromJson(args[0] as Map<String, dynamic>);
-        context.read<TicketBloc>().add(AddTicket(ticket));
-      }
-    });
-    hubConnection
-        .start()
-        .then((_) {
-      print("✅ Статус: ${hubConnection.state}");
-    })
-        .catchError((error) {
-      print("❌ Ошибка: $error");
-    });
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -113,23 +84,27 @@ class _AllTicketsScreenUIState extends State<AllTicketsScreenUI> {
     if (top + cardHeight > bottomLimit) {
       top = bottomLimit - cardHeight - offset;
     }
+
     return Stack(
       children: [
         Scaffold(
           backgroundColor: AppColors.backgroundCardColor,
-          body: BlocConsumer<TicketBloc, TicketState>(
-            listener: (BuildContext context, TicketState state) {
-              if (state is TicketLoaded) {
-                _scrollToBottom(); // <-- прокручиваем при каждом обновлении
-              }
+          body: BlocBuilder<TicketBloc, TicketState>(
+            buildWhen: (previous, current) {
+              // Перестраиваем UI только для состояний, которые нужны на этом экране
+              return current is TicketLoading ||
+                  current is TicketLoaded ||
+                  current is TicketError;
             },
             builder: (context, state) {
+              print("🔄 UI rebuild: ${state.runtimeType}");
               if (state is TicketLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
-
               if (state is TicketLoaded) {
-
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  dataSource?.updateTickets(state.tickets);
+                });
                 return TiketGreatTable(tickets: state.tickets);
               }
 
@@ -154,45 +129,43 @@ class _AllTicketsScreenUIState extends State<AllTicketsScreenUI> {
               child: _hoveredTicket == null
                   ? const SizedBox()
                   : IgnorePointer(
-                child: Material(
-                  elevation: 10,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: 500,
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "#${_hoveredTicket!.id}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
+                      child: Material(
+                        elevation: 10,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 500,
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "#${_hoveredTicket!.id}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(_hoveredTicket!.title ?? ''),
+                              const SizedBox(height: 4),
+                              Text(
+                                _hoveredTicket!.description ?? '',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(_hoveredTicket!.phone ?? ''),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(_hoveredTicket!.title ?? ''),
-                        const SizedBox(height: 4),
-                        Text(
-                          _hoveredTicket!.description ?? '',
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(_hoveredTicket!.phone ?? ''),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
             ),
           ),
       ],
     );
   }
 }
-
-

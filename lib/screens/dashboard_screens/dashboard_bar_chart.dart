@@ -17,7 +17,8 @@ import '../../models/reports_model/report_post_model.dart';
 import '../../models/reports_model/report_response_model.dart';
 import '../../services/report_service.dart';
 import '../../services/user_service.dart';
-import '../table_great/dashboard_great_table.dart';
+
+import '../table_great_tickets/dashboard_great_table.dart';
 
 class DashboardBarChart extends StatelessWidget {
   const DashboardBarChart({super.key});

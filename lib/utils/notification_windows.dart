@@ -1,0 +1,68 @@
+import 'package:service_desk/models/tiket_comment/ticket_comment_model.dart';
+import 'package:windows_notification/notification_message.dart';
+import 'package:windows_notification/windows_notification.dart';
+
+import '../models/tikets_models/tiket_response.dart';
+
+
+final _winNotify = WindowsNotification(
+  applicationId: 'com.example.service_desk',
+);
+class NotificationWindows{
+
+
+
+  void showTicketNotification(TicketResponse ticket) {
+
+    final template = '''
+<toast>
+  <visual>
+    <binding template="ToastGeneric">
+      <text>🔔 Новая заявка ${ticket.id}</text>
+      <text>Компания: ${ticket.companyName}</text>
+      <text>${ticket.title}</text>
+      <text placement="attribution">Система ServiceDesk</text>
+      <image src="C:\\path\\to\\logo.png" placement="appLogoOverride" hint-crop="circle"/>
+    </binding>
+  </visual>
+  <actions>
+    <action content="✅ Принять" arguments="accept_${ticket.id}"/>
+    <action content="❌ Закрыть" arguments="dismiss"/>
+  </actions>
+  <audio src="ms-winsoundevent:Notification.Mail"/>
+</toast>
+    ''';
+    final message = NotificationMessage.fromCustomTemplate(
+      '${ticket.id}',
+      group: 'tickets',
+    );
+    _winNotify.showNotificationCustomTemplate(message, template);
+  }
+
+
+  void showCommentNotification(TicketCommentModel ticket) {
+
+    final template = '''
+<toast>
+  <visual>
+    <binding template="ToastGeneric">
+      <image src="D:\\AppProject\\service_desk\\assets\\image\\big_logo.png" placement="appLogoOverride" hint-crop="circle"/>
+      <text>Заявка #${ticket.ticketId}</text>
+      <text>📩 ${ticket.messageText}</text>
+      <text placement="attribution">ServiceDesk</text>
+    </binding>
+  </visual>
+  <actions>
+    <action content="Открыть" arguments="open_${ticket.id}"/>
+    <action content="Закрыть" arguments="dismiss"/>
+  </actions>
+</toast>
+    ''';
+    final message = NotificationMessage.fromCustomTemplate(
+      '${ticket.id}',
+      group: 'tickets',
+    );
+    _winNotify.showNotificationCustomTemplate(message, template);
+  }
+
+}

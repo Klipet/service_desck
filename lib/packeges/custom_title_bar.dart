@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:service_desk/const/const_colors.dart';
+import 'package:signalr_netcore/hub_connection.dart';
+import 'package:signalr_netcore/hub_connection_builder.dart';
 import 'package:window_manager/window_manager.dart';
+
+import '../blocs/tiket_blocs/tiket_bloc.dart';
+import '../blocs/tiket_blocs/tiket_event.dart';
+import '../models/tikets_models/tiket_response.dart';
+import '../services/user_service.dart';
 
 class CustomTitleBar extends StatelessWidget {
   const CustomTitleBar({super.key});
@@ -49,6 +57,7 @@ class CustomTitleBar extends StatelessWidget {
     );
   }
 }
+
 class _WinButton extends StatefulWidget {
   const _WinButton({
     required this.icon,

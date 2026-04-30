@@ -87,6 +87,7 @@ class TicketGridWidget extends DataGridSource{
           ),
         );
       }).toList()
+
     );
   }
 }
