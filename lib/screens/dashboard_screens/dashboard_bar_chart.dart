@@ -223,7 +223,7 @@ class _BarRowState extends State<_BarRow> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(top: 8.h, left: 16.w, right: 16.w),
+          padding: EdgeInsets.only(top: 6.h, left: 16.w, right: 16.w),
           child: Stack(
             alignment: Alignment.centerLeft,
             children: [
@@ -283,7 +283,7 @@ class _BarRowState extends State<_BarRow> {
                 final minWidth = 105.0; // минимум чтобы текст влез
                 final isMin = barWidth > (constant.maxWidth - 100.h);
                 return Padding(
-                  padding: EdgeInsets.only(top: 8.h, left: 16.w, right: 16.w),
+                  padding: EdgeInsets.only(top: 3.h, left: 16.w, right: 16.w),
                   child: Stack(
                     alignment: Alignment.centerLeft,
                     children: [

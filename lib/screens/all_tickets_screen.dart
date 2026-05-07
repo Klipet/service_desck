@@ -14,6 +14,7 @@ import '../main.dart';
 import '../models/tikets_models/tiket_response.dart';
 import '../services/ticket_service.dart';
 import '../utils/ticket_grid_widget.dart';
+import 'tikets/ticket_table_screen.dart';
 
 class AllTicketsScreen extends StatelessWidget {
   const AllTicketsScreen({super.key});
@@ -85,87 +86,33 @@ class _AllTicketsScreenUIState extends State<AllTicketsScreenUI> {
       top = bottomLimit - cardHeight - offset;
     }
 
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: AppColors.backgroundCardColor,
-          body: BlocBuilder<TicketBloc, TicketState>(
-            buildWhen: (previous, current) {
-              // Перестраиваем UI только для состояний, которые нужны на этом экране
-              return current is TicketLoading ||
-                  current is TicketLoaded ||
-                  current is TicketError;
-            },
-            builder: (context, state) {
-              print("🔄 UI rebuild: ${state.runtimeType}");
-              if (state is TicketLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (state is TicketLoaded) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  dataSource?.updateTickets(state.tickets);
-                });
-                return TiketGreatTable(tickets: state.tickets);
-              }
+    return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+      body: BlocBuilder<TicketBloc, TicketState>(
+        buildWhen: (previous, current) {
+          return current is TicketLoading ||
+              current is TicketLoaded ||
+              current is TicketError;
+        },
+        builder: (context, state) {
+          print("🔄 UI rebuild: ${state.runtimeType}");
+          if (state is TicketLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is TicketLoaded) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              dataSource?.updateTickets(state.tickets);
+            });
+            return TicketTableScreen(tickets: state.tickets);
+          }
 
-              if (state is TicketError) {
-                return Center(child: Text(state.message));
-              }
+          if (state is TicketError) {
+            return Center(child: Text(state.message));
+          }
 
-              return const SizedBox();
-            },
-          ),
-        ),
-        // Карточка при наведении
-        if (_hoveredTicket != null)
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 80),
-            curve: Curves.easeOut,
-            left: left,
-            top: top,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 120),
-              opacity: _hoveredTicket == null ? 0 : 1,
-              child: _hoveredTicket == null
-                  ? const SizedBox()
-                  : IgnorePointer(
-                      child: Material(
-                        elevation: 10,
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          width: 500,
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "#${_hoveredTicket!.id}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(_hoveredTicket!.title ?? ''),
-                              const SizedBox(height: 4),
-                              Text(
-                                _hoveredTicket!.description ?? '',
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(_hoveredTicket!.phone ?? ''),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-            ),
-          ),
-      ],
+          return const SizedBox();
+        },
+      ),
     );
   }
 }

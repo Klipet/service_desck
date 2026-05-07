@@ -165,10 +165,7 @@ class _TiketGreatTableState extends State<TiketGreatTable> {
   @override
   void didUpdateWidget(TiketGreatTable oldWidget) {
     super.didUpdateWidget(oldWidget);
-  //  if (oldWidget.tickets != widget.tickets) {
-      _filteredTickets = List.from(widget.tickets)..sort((a, b) => b.id.compareTo(a.id));
       _dataSource!.updateTickets(_filteredTickets);
-  //  }
   }
 
   void _showColumnManager() {

@@ -11,6 +11,7 @@ class AppColors{
   static final backgroundColor = HexColor("#FFFFFF");
   static final btColor = HexColor("#88A838");
   static final textTitleFl = HexColor("#446158");
+  static final textColorBlack = HexColor("#272C1A");
   static final dorderError = Colors.red;
   static final gradientColor = LinearGradient(colors: [
     HexColor("#64BF02"),
@@ -24,6 +25,11 @@ class AppColors{
   static final gradientColorBottom = [
     HexColor("#64BF02"),
     HexColor("#A4DA00"),
+  ];
+
+  static final gradientDefault = [
+    HexColor("#FFFFFF"),
+    HexColor("#FFFFFF"),
   ];
 
   static final dataGreadColorTitle = HexColor("#446158");
