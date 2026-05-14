@@ -88,6 +88,7 @@ flutter:
    - assets/image/tool_bar_ticket/trash_act_tiket.svg
    - assets/image/tool_bar_ticket/get_tiket.svg
    - assets/image/tool_bar_ticket/edit_tiket.svg
+   - assets/image/tool_bar_ticket/inbox.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

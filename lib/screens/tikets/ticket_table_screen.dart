@@ -108,7 +108,24 @@ class _TicketTableScreenState extends State<TicketTableScreen> {
     }
 
     if (_columnConfigs.where((c) => c.visible).isEmpty) {
-      return const Center(child: Text('Все колонки скрыты'));
+      return Column(
+        children: [
+          TicketToolbar(
+            statuses: _uniqueStatuses,
+            selectedStatus: _selectedStatus,
+            onStatusChanged: (val) {
+              setState(() {
+                _selectedStatus = val;
+              });
+              _applyFilter(); //
+            },
+            onManageColumns: _showColumnManager,
+            allTickets: [],
+            onFilterChanged: (List<TicketResponse> value) {  },
+          ),
+          Center(child: Text('Все колонки скрыты')),
+        ],
+      );
     }
     return Column(
       children: [

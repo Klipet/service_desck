@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -44,7 +46,9 @@ Future<void> main() async {
 
   final ticketBloc = TicketBloc(TicketService())..add(LoadTickets());
   final hub = HubConnecterR(ticketBloc);
-  await hub.connectToSignalR();
+
+  // unawaited — не блокируем запуск приложения
+  unawaited(hub.startWithAutoReconnect());
   runApp(
     MultiProvider(
       providers: [

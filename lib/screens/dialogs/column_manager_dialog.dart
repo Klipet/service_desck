@@ -36,6 +36,7 @@ class ColumnManagerDialogState extends State<ColumnManagerDialog> {
                     onPressed: () {
                       setState(() {
                         for (final c in widget.configs) {
+                          if (c.columnName == 'id') continue; // <- защита
                           c.visible = true;
                         }
                       });
@@ -79,8 +80,9 @@ class ColumnManagerDialogState extends State<ColumnManagerDialog> {
                       style: const TextStyle(fontSize: 11),
                     ),
                     value: config.visible,
-                    onChanged: (val) {
-                      // Запрещаем скрыть последнюю видимую
+                    onChanged: config.columnName == 'id'
+                        ? null
+                        : (val) {
                       if (val == false && visibleCount <= 1) return;
                       setState(() => config.visible = val ?? true);
                       widget.onChanged();

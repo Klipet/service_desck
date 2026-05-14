@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:service_desk/models/tiket_comment/ticket_comment_model.dart';
 import 'package:service_desk/services/user_service.dart';
 import 'package:signalr_netcore/hub_connection.dart';
@@ -11,45 +13,69 @@ import '../utils/notification_windows.dart';
 class HubConnecterR {
   final TicketBloc ticketBloc;
   late HubConnection hubConnection;
-
+  bool _isConnected = false;
   HubConnecterR(this.ticketBloc);
 
-  Future<void> connectToSignalR() async {
-    String apikey;
-    var userInfo = UserService.getUser();
-    apikey = userInfo?.apiKey ?? '';
+  String get _baseUrl {
+    if (Platform.isAndroid) return 'http://10.0.2.2:5000';
+    return 'http://localhost:5000';
+  }
 
+  // Запускаем и постоянно следим за соединением
+  Future<void> startWithAutoReconnect() async {
+    _setupHandlers();
+
+    while (true) {
+      if (!_isConnected) {
+        await _tryConnect();
+      }
+      await Future.delayed(Duration(seconds: 50)); // проверяем каждые 5 сек
+    }
+  }
+
+  Future<void> _tryConnect() async {
+    try {
+      // Если хаб уже существует и не disconnected — пропускаем
+      if (hubConnection.state == HubConnectionState.Connected) {
+        _isConnected = true;
+        return;
+      }
+
+      await hubConnection.start();
+      _isConnected = true;
+      print("✅ SignalR подключен");
+    } catch (e) {
+      _isConnected = false;
+      print("⚠️ SignalR недоступен, повтор через 50 сек... $e");
+    }
+  }
+
+  void _setupHandlers() {
     hubConnection = HubConnectionBuilder()
-        .withUrl("http://localhost:5000/ticketHub?access_token=$apikey")
+        .withUrl("$_baseUrl/ticketHub?access_token=${UserService.getUser()?.apiKey ?? ''}")
         .build();
 
-    hubConnection.on("NewTicketCreated", (args) {
-      print("📡 SignalR событие пришло: $args");
-      if (args != null && args.isNotEmpty) {
-        final ticket = TicketResponse.fromJson(
-          args[0] as Map<String, dynamic>,
-        );
+    // Следим за разрывом соединения
+    hubConnection.onclose((error) {
+      _isConnected = false;
+      print("🔴 SignalR отключился: $error");
+    });
 
-        ticketBloc.add(AddTicket(ticket)); // ✅ без context
+    hubConnection.on("NewTicketCreated", (args) {
+      if (args != null && args.isNotEmpty) {
+        final ticket = TicketResponse.fromJson(args[0] as Map<String, dynamic>);
+        ticketBloc.add(AddTicket(ticket));
         NotificationWindows().showTicketNotification(ticket);
         print('✅ новый тикет');
       }
     });
 
     hubConnection.on("NewComment", (args) {
-      print("📡 SignalR событие пришло: $args");
       if (args != null && args.isNotEmpty) {
-        final ticket = TicketCommentModel.fromJson(
-          args[0] as Map<String, dynamic>,
-        );
-
-       ticketBloc.add(AddComment(ticket)); // ✅ без context
-      //  NotificationWindows().showTicketNotification(ticket!);
+        final ticket = TicketCommentModel.fromJson(args[0] as Map<String, dynamic>);
+        ticketBloc.add(AddComment(ticket));
         print('✅ новый NewComment');
       }
     });
-
-    await hubConnection.start();
-    print("✅ SignalR подключен");
   }
 }

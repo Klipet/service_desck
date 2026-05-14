@@ -309,11 +309,13 @@ class _TicketToolbarState extends State<TicketToolbar> {
                     ),
                   ),
                   // Răspunsuri primite — бейдж потом добавишь
-                //  _ActionButton(
-                //    icon: 'assets/image/tool_bar_ticket/add_tiket.svg',
-                //    label: 'Răspunsuri primite',
-                //    onTap: null,
-                //  ),
+                  SizedBox(width: 4.w),
+                  _ActionMessageActualButton(
+                      icon: 'assets/image/tool_bar_ticket/inbox.svg',
+                      label: 'Răspunsuri primite',
+                      width: 151.w,
+                      countMessage: 50
+                  )
                 ],
               ),
             ),
@@ -410,6 +412,74 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
+class _ActionMessageActualButton extends StatelessWidget {
+  final String icon;
+  final String label;
+  final double width;
+  final int countMessage;
+  final VoidCallback? onTap;
+
+  const _ActionMessageActualButton({required this.icon, required this.label, this.onTap, required this.width, required this.countMessage});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10.r),
+      child: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          Container(
+            width: width,
+            margin: EdgeInsets.only(left: 4.w, bottom: 4.h, top: 4.h,),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                color: AppColors.backgroundColor,
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(
+                    color: AppColors.textTitleFl,
+                    width: 1.w
+                )
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(icon,  color: AppColors.textTitleFl, width: 16.w,height: 16.h,),
+                SizedBox(width: 4.w),
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 10.sp.clamp(10, 25),
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textTitleFl,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if(countMessage > 0)
+          Container(
+            width: 20.w,
+            height: 20.h,
+            alignment: Alignment.center,
+          //  margin: EdgeInsets.only(top: 2.h,),
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: AppColors.gradientColor
+            ),
+            child: Text(countMessage.toString(), style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w500,
+                color: AppColors.backgroundColor,
+                fontSize: 10.sp.clamp(10, 16)
+            ),),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DropDawnWidget extends StatelessWidget {
   final List<String> label;
   final String selectedStatus;
@@ -430,10 +500,7 @@ class _DropDawnWidget extends StatelessWidget {
       color: AppColors.textTitleFl,
     );
 
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(20.r),
-      borderSide: BorderSide(color: AppColors.textTitleFl, width: 1.w),
-    );
+
 
     return Container(
       height: 32.h,
