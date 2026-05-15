@@ -43,6 +43,7 @@ class HubConnecterR {
 
       await hubConnection.start();
       _isConnected = true;
+      NotificationWindows().showNotificationConnect('✅ SignalR подключен');
       print("✅ SignalR подключен");
     } catch (e) {
       _isConnected = false;
@@ -58,6 +59,7 @@ class HubConnecterR {
     // Следим за разрывом соединения
     hubConnection.onclose((error) {
       _isConnected = false;
+      NotificationWindows().showNotificationConnect('🔴 SignalR отключился');
       print("🔴 SignalR отключился: $error");
     });
 

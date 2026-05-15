@@ -12,11 +12,19 @@ import 'ticket_tab_filter.dart';
 class TicketToolbar extends StatefulWidget {
   final List<String> statuses;
   final String? selectedStatus;
-  final ValueChanged<String?> onStatusChanged;
+
   final List<TicketResponse> allTickets;
-  final ValueChanged<List<TicketResponse>> onFilterChanged;
+
+  final VoidCallback? onLoadAll;
+  final VoidCallback? onLoadMine;
+
+
   final VoidCallback onManageColumns;
-  final VoidCallback? onSearch;
+  final ValueChanged<String?>? onSearch;
+
+  //статусы дробдаун
+  final ValueChanged<String?> onStatusChanged;
+  // кнопки с тикетами
   final VoidCallback? onCreate;
   final VoidCallback? onEdit;
   final VoidCallback? onAttach;
@@ -30,13 +38,18 @@ class TicketToolbar extends StatefulWidget {
     required this.onStatusChanged,
     required this.onManageColumns,
     required this.allTickets,
-    required this.onFilterChanged,
+
+    this.onLoadAll,
+    this.onLoadMine,
+
+
     this.onSearch,
     this.onCreate,
     this.onEdit,
     this.onAttach,
     this.onAssign,
     this.onDelete,
+
   });
 
   @override
@@ -46,40 +59,25 @@ class TicketToolbar extends StatefulWidget {
 class _TicketToolbarState extends State<TicketToolbar> {
   TicketTabFilter _activeTab = TicketTabFilter.all;
   final _searchController = TextEditingController();
-  final int _currentUserId = UserService.getUser()?.userId ?? -1;
+
 
   void _applyTab(TicketTabFilter tab) {
     setState(() => _activeTab = tab);
-
-    List<TicketResponse> result;
+    print("🔘 tab: $tab onLoadAll: ${widget.onLoadAll} onLoadMine: ${widget.onLoadMine}");
 
     switch (tab) {
       case TicketTabFilter.all:
-        result = widget.allTickets;
+        widget.onLoadAll?.call();
         break;
       case TicketTabFilter.mine:
-        result = widget.allTickets
-            .where((t) => t.userId == _currentUserId)
-            .toList();
+        widget.onLoadMine?.call();
         break;
     }
-
-    widget.onFilterChanged(result);
   }
 
   void _onSearch() {
-    final query = _searchController.text.trim().toLowerCase();
-    if (query.isEmpty) {
-      widget.onFilterChanged(widget.allTickets);
-      return;
-    }
-    final result = widget.allTickets.where((t) {
-      return t.id.toString().contains(query) ||
-          (t.stateName?.toLowerCase().contains(query) ?? false) ||
-          (t.userName?.toLowerCase().contains(query) ?? false) ||
-          (t.title?.toLowerCase().contains(query) ?? false);
-    }).toList();
-    widget.onFilterChanged(result);
+    final String? query = _searchController.text;
+    widget.onSearch?.call(query ?? null); // ✅ передаём строку наверх
   }
 
   @override
@@ -116,7 +114,6 @@ class _TicketToolbarState extends State<TicketToolbar> {
                       Expanded(
                         child: TextField(
                           controller: _searchController,
-                          onSubmitted: (_) => _onSearch(),
                           style: GoogleFonts.poppins(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w300,
@@ -136,7 +133,7 @@ class _TicketToolbarState extends State<TicketToolbar> {
                       SizedBox(width: 8.w),
                       // Кнопка Caută
                       GestureDetector(
-                        onTap: () {},
+                        onTap: _onSearch,
                         child: Container(
                           height: 24.h,
                           alignment: Alignment.center,

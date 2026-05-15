@@ -7,13 +7,13 @@ import 'package:service_desk/const/const_colors.dart';
 import 'package:service_desk/data_base/user_model.dart';
 import 'package:service_desk/packeges/custom_title_bar.dart';
 import 'package:service_desk/screens/settings_screen.dart';
+import 'package:service_desk/screens/tikets/ticket_table_screen.dart';
 import 'package:service_desk/services/user_service.dart';
 
 import '../packeges/costom_nav/costom_sidebar.dart';
 import '../packeges/costom_nav/icon_nav.dart';
 import '../packeges/costom_nav/nav_item.dart';
 import '../utils/navigator_provider.dart';
-import 'all_tickets_screen.dart';
 import 'create_tiket_screen.dart';
 import 'dashboard_screens/dashboard_screen.dart';
 import 'my_tickets_screen.dart';
@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         padding: EdgeInsets.only(right: 16.w),
                         child: DashboardScreen(),
                       ),
-                      AllTicketsScreen(),
+                      TicketScreen(),
                       Padding(
                         padding: const EdgeInsets.only(right: 24),
                         child: MyTicketsScreen(),

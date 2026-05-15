@@ -25,6 +25,12 @@ class UserService {
     return box.get('user');
   }
 
+  // Получить пользователя
+  static UserModel? getUserId() {
+    final box = Hive.box<UserModel>(_boxName);
+    return box.get('user');
+  }
+
   // Удалить пользователя
   static Future<void> deleteUser() async {
     final box = Hive.box<UserModel>(_boxName);
