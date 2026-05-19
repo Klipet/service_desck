@@ -3,20 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:service_desk/data_base/data_models/user_model_permisions_db.dart';
+import 'package:service_desk/data_base/user_repository.dart';
 
 import '../../../const/const_colors.dart';
+import '../../../data_base/data_models/user_model_db.dart';
 import '../../../models/tikets_models/tiket_response.dart';
-import '../../../services/user_service.dart';
 import 'ticket_tab_filter.dart';
 
 class TicketToolbar extends StatefulWidget {
   final List<String> statuses;
   final String? selectedStatus;
-  final ValueChanged<String?> onStatusChanged;
+
   final List<TicketResponse> allTickets;
-  final ValueChanged<List<TicketResponse>> onFilterChanged;
+
+  final VoidCallback? onLoadAll;
+  final VoidCallback? onLoadMine;
+
   final VoidCallback onManageColumns;
-  final VoidCallback? onSearch;
+  final ValueChanged<String?>? onSearch;
+
+  //статусы дробдаун
+  final ValueChanged<String?> onStatusChanged;
+
+  // кнопки с тикетами
   final VoidCallback? onCreate;
   final VoidCallback? onEdit;
   final VoidCallback? onAttach;
@@ -30,7 +40,10 @@ class TicketToolbar extends StatefulWidget {
     required this.onStatusChanged,
     required this.onManageColumns,
     required this.allTickets,
-    required this.onFilterChanged,
+
+    this.onLoadAll,
+    this.onLoadMine,
+
     this.onSearch,
     this.onCreate,
     this.onEdit,
@@ -46,41 +59,44 @@ class TicketToolbar extends StatefulWidget {
 class _TicketToolbarState extends State<TicketToolbar> {
   TicketTabFilter _activeTab = TicketTabFilter.all;
   final _searchController = TextEditingController();
-  final int _currentUserId = UserService.getUser()?.userId ?? -1;
+  final _userRepo = UserRepository();
+  Set<String> _permissions = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPermissions();
+  }
 
   void _applyTab(TicketTabFilter tab) {
     setState(() => _activeTab = tab);
-
-    List<TicketResponse> result;
+    print(
+      "🔘 tab: $tab onLoadAll: ${widget.onLoadAll} onLoadMine: ${widget.onLoadMine}",
+    );
 
     switch (tab) {
       case TicketTabFilter.all:
-        result = widget.allTickets;
+        widget.onLoadAll?.call();
         break;
       case TicketTabFilter.mine:
-        result = widget.allTickets
-            .where((t) => t.userId == _currentUserId)
-            .toList();
+        widget.onLoadMine?.call();
         break;
     }
+  }
 
-    widget.onFilterChanged(result);
+  Future<void> _loadPermissions() async {
+    final perms = await _userRepo.getPermissions();
+    setState(() {
+      _permissions = perms.map((p) => p.name).toSet(); // твоё поле
+    });
   }
 
   void _onSearch() {
-    final query = _searchController.text.trim().toLowerCase();
-    if (query.isEmpty) {
-      widget.onFilterChanged(widget.allTickets);
-      return;
-    }
-    final result = widget.allTickets.where((t) {
-      return t.id.toString().contains(query) ||
-          (t.stateName?.toLowerCase().contains(query) ?? false) ||
-          (t.userName?.toLowerCase().contains(query) ?? false) ||
-          (t.title?.toLowerCase().contains(query) ?? false);
-    }).toList();
-    widget.onFilterChanged(result);
+    final String? query = _searchController.text;
+    widget.onSearch?.call(query ?? null); // ✅ передаём строку наверх
   }
+
+  bool _has(String permission) => _permissions.contains(permission);
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +132,6 @@ class _TicketToolbarState extends State<TicketToolbar> {
                       Expanded(
                         child: TextField(
                           controller: _searchController,
-                          onSubmitted: (_) => _onSearch(),
                           style: GoogleFonts.poppins(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w300,
@@ -136,7 +151,7 @@ class _TicketToolbarState extends State<TicketToolbar> {
                       SizedBox(width: 8.w),
                       // Кнопка Caută
                       GestureDetector(
-                        onTap: () {},
+                        onTap: _onSearch,
                         child: Container(
                           height: 24.h,
                           alignment: Alignment.center,
@@ -262,7 +277,7 @@ class _TicketToolbarState extends State<TicketToolbar> {
                   SizedBox(width: 8.w),
                   Container(
                     height: 32.h,
-                  //  width: 479.w,
+                    //  width: 479.w,
                     padding: EdgeInsets.only(right: 4.h),
                     decoration: BoxDecoration(
                       color: AppColors.backgroundColor,
@@ -280,30 +295,38 @@ class _TicketToolbarState extends State<TicketToolbar> {
                           icon: 'assets/image/tool_bar_ticket/create_tiket.svg',
                           label: 'Crează',
                           onTap: widget.onCreate,
+                          isDisabled: _has('ticket.create'),
                         ),
+
                         _ActionButton(
                           width: 105.w,
                           icon: 'assets/image/tool_bar_ticket/edit_tiket.svg',
                           label: 'Redactare',
                           onTap: widget.onEdit,
+                          isDisabled: _has('ticket.update'),
                         ),
+
                         _ActionButton(
                           width: 84.w,
                           icon: 'assets/image/tool_bar_ticket/add_tiket.svg',
                           label: 'Alipire',
                           onTap: widget.onAttach,
+                          isDisabled: _has('ticket.attach'),
                         ),
                         _ActionButton(
                           width: 92.w,
                           icon: 'assets/image/tool_bar_ticket/get_tiket.svg',
                           label: 'Atribuie',
                           onTap: widget.onAssign,
+                          isDisabled: _has('ticket.assign'),
                         ),
                         _ActionButton(
-                          width:  85.w,
-                          icon: 'assets/image/tool_bar_ticket/trash_act_tiket.svg',
+                          width: 85.w,
+                          icon:
+                              'assets/image/tool_bar_ticket/trash_act_tiket.svg',
                           label: 'Șterge',
                           onTap: widget.onDelete,
+                          isDisabled: _has('ticket.delete'),
                         ),
                       ],
                     ),
@@ -311,11 +334,11 @@ class _TicketToolbarState extends State<TicketToolbar> {
                   // Răspunsuri primite — бейдж потом добавишь
                   SizedBox(width: 4.w),
                   _ActionMessageActualButton(
-                      icon: 'assets/image/tool_bar_ticket/inbox.svg',
-                      label: 'Răspunsuri primite',
-                      width: 151.w,
-                      countMessage: 50
-                  )
+                    icon: 'assets/image/tool_bar_ticket/inbox.svg',
+                    label: 'Răspunsuri primite',
+                    width: 151.w,
+                    countMessage: 50,
+                  ),
                 ],
               ),
             ),
@@ -371,38 +394,45 @@ class _ActionButton extends StatelessWidget {
   final String label;
   final double width;
   final VoidCallback? onTap;
+  final bool isDisabled;
 
-  const _ActionButton({required this.icon, required this.label, this.onTap, required this.width});
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    this.onTap,
+    required this.width,
+    this.isDisabled = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final color = isDisabled
+        ? AppColors.textTitleFl
+        : AppColors.hintTextColor;
     return InkWell(
-      onTap: onTap,
+      onTap: isDisabled ? onTap : null,
       borderRadius: BorderRadius.circular(10.r),
       child: Container(
         width: width,
-        margin: EdgeInsets.only(left: 4.w, bottom: 4.h, top: 4.h,),
+        margin: EdgeInsets.only(left: 4.w, bottom: 4.h, top: 4.h),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: AppColors.backgroundCardColor,
+          color: AppColors.colorButtonTiket,
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: AppColors.borderCardColor,
-            width: 1.w
-          )
+          border: Border.all(color: AppColors.borderCardColor, width: 1.w),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SvgPicture.asset(icon,  color: AppColors.textTitleFl, width: 16.w,height: 16.h,),
+            SvgPicture.asset(icon, color: color, width: 16.w, height: 16.h),
             SizedBox(width: 4.w),
             Text(
               label,
               style: GoogleFonts.poppins(
                 fontSize: 10.sp.clamp(10, 25),
                 fontWeight: FontWeight.w500,
-                color: AppColors.textTitleFl,
+                color: color,
               ),
             ),
           ],
@@ -419,7 +449,13 @@ class _ActionMessageActualButton extends StatelessWidget {
   final int countMessage;
   final VoidCallback? onTap;
 
-  const _ActionMessageActualButton({required this.icon, required this.label, this.onTap, required this.width, required this.countMessage});
+  const _ActionMessageActualButton({
+    required this.icon,
+    required this.label,
+    this.onTap,
+    required this.width,
+    required this.countMessage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -431,21 +467,23 @@ class _ActionMessageActualButton extends StatelessWidget {
         children: [
           Container(
             width: width,
-            margin: EdgeInsets.only(left: 4.w, bottom: 4.h, top: 4.h,),
+            margin: EdgeInsets.only(left: 4.w, bottom: 4.h, top: 4.h),
             alignment: Alignment.center,
             decoration: BoxDecoration(
-                color: AppColors.backgroundColor,
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(
-                    color: AppColors.textTitleFl,
-                    width: 1.w
-                )
+              color: AppColors.backgroundColor,
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: AppColors.textTitleFl, width: 1.w),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset(icon,  color: AppColors.textTitleFl, width: 16.w,height: 16.h,),
+                SvgPicture.asset(
+                  icon,
+                  color: AppColors.textTitleFl,
+                  width: 16.w,
+                  height: 16.h,
+                ),
                 SizedBox(width: 4.w),
                 Text(
                   label,
@@ -458,22 +496,25 @@ class _ActionMessageActualButton extends StatelessWidget {
               ],
             ),
           ),
-          if(countMessage > 0)
-          Container(
-            width: 20.w,
-            height: 20.h,
-            alignment: Alignment.center,
-          //  margin: EdgeInsets.only(top: 2.h,),
-            decoration: BoxDecoration(
+          if (countMessage > 0)
+            Container(
+              width: 20.w,
+              height: 20.h,
+              alignment: Alignment.center,
+              //  margin: EdgeInsets.only(top: 2.h,),
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: AppColors.gradientColor
+                gradient: AppColors.gradientColor,
+              ),
+              child: Text(
+                countMessage.toString(),
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.backgroundColor,
+                  fontSize: 10.sp.clamp(10, 16),
+                ),
+              ),
             ),
-            child: Text(countMessage.toString(), style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w500,
-                color: AppColors.backgroundColor,
-                fontSize: 10.sp.clamp(10, 16)
-            ),),
-          ),
         ],
       ),
     );
@@ -499,8 +540,6 @@ class _DropDawnWidget extends StatelessWidget {
       fontSize: 10.sp.clamp(15, 20),
       color: AppColors.textTitleFl,
     );
-
-
 
     return Container(
       height: 32.h,

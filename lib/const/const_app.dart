@@ -9,7 +9,9 @@ const prefKey = 'ticket_grid_columns';
 const prefWidth = 'width';
 
 List<ColumnConfig> defaultColumns(BuildContext context) => [
-  ColumnConfig(columnName: 'id', label: 'ID', width: 20.w),
+  ColumnConfig(columnName: 'checkbox', label: '', width: 20.w, visible: true),
+  ColumnConfig(columnName: 'newMessage', label: '', width: 20.w, visible: true),
+  ColumnConfig(columnName: 'id', label: 'ID', width: 20.w, visible: true),
   ColumnConfig(columnName: 'title', label: 'Заголовок', width: 315.w),
   ColumnConfig(columnName: 'phone', label: 'Телефон', width: 150.w),
   ColumnConfig(columnName: 'bugNumber', label: 'Номер бага', width: 150.w),

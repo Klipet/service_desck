@@ -29,7 +29,9 @@ class ColumnSettingsService{
     final jsonString = prefs.getString(prefWidth);
     if (jsonString == null) return {};
     final Map<String, dynamic> decoded = jsonDecode(jsonString);
-    return decoded.map((key, value) => MapEntry(key, value.toDouble()));
+    return decoded
+        .map((key, value) => MapEntry(key, value.toDouble()))
+      ..removeWhere((key, value) => value <= 0);
   }
 
   Future<List<ColumnConfig>> loadColumnSettings(List<ColumnConfig> defaults) async {

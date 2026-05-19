@@ -3,36 +3,31 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:service_desk/app_router.dart';
-import 'package:service_desk/models/tiket_comment/ticket_comment_model.dart';
-import 'package:service_desk/screens/auth_screen.dart';
+import 'package:service_desk/data_base/init_isar.dart';
+import 'package:service_desk/data_base/user_repository.dart';
 import 'package:service_desk/services/hub_connecter.dart';
 import 'package:service_desk/services/ticket_service.dart';
 import 'package:service_desk/utils/navigator_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:service_desk/utils/notification_windows.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:windows_notification/windows_notification.dart';
 
 import 'blocs/tiket_blocs/tiket_bloc.dart';
 import 'blocs/tiket_blocs/tiket_event.dart';
 import 'blocs/tiket_blocs/tiket_state.dart';
 import 'const/const_colors.dart';
-import 'data_base/user_model.dart';
+
 
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
+
+  await InitIsar.init();
   await windowManager.ensureInitialized();
-  Hive.registerAdapter(UserModelAdapter()); // 👈 сначала регистрируй адаптер
-  await Hive.openBox<UserModel>('userBox'); // потом открывай с типом
-  await Hive.openBox('settingsBox');
   WindowOptions windowOptions =  WindowOptions(
     backgroundColor: Colors.transparent,
     titleBarStyle: TitleBarStyle.hidden,
@@ -44,7 +39,7 @@ Future<void> main() async {
     await windowManager.focus();
   });
 
-  final ticketBloc = TicketBloc(TicketService())..add(LoadTickets());
+  final ticketBloc = TicketBloc(ticketService: TicketService(), userRepository: UserRepository())..add(LoadTickets());
   final hub = HubConnecterR(ticketBloc);
 
   // unawaited — не блокируем запуск приложения

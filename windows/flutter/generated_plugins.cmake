@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   flutter_localization
   flutter_platform_alert
+  isar_flutter_libs
   screen_retriever_windows
   window_manager
   windows_notification

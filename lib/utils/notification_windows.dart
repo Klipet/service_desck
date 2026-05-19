@@ -65,4 +65,25 @@ class NotificationWindows{
     _winNotify.showNotificationCustomTemplate(message, template);
   }
 
+  void showNotificationConnect(String state) {
+
+    final template = '''
+<toast>
+  <visual>
+    <binding template="ToastGeneric">
+      <image src="D:\\AppProject\\service_desk\\assets\\image\\big_logo.png" placement="appLogoOverride" hint-crop="circle"/>
+      <text>Сервис SignalR</text>
+      <text>Текуший Статус: ${state}</text>
+      <text placement="attribution">ServiceDesk</text>
+    </binding>
+  </visual>
+</toast>
+    ''';
+    final message = NotificationMessage.fromCustomTemplate(
+      '${state}',
+      group: 'tickets',
+    );
+    _winNotify.showNotificationCustomTemplate(message, template);
+  }
+
 }

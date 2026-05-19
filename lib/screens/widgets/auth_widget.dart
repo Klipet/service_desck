@@ -7,6 +7,7 @@ import 'package:service_desk/app_router.dart';
 import 'package:service_desk/blocs/auth_blocs/auth_bloc.dart';
 import 'package:service_desk/blocs/auth_blocs/auth_state.dart';
 import 'package:service_desk/const/const_widget_border.dart';
+import 'package:service_desk/data_base/user_repository.dart';
 import 'package:service_desk/services/auth_service.dart';
 
 import '../../blocs/auth_blocs/auth_event.dart';
@@ -18,7 +19,7 @@ class AuthWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AuthBloc(AuthService()),
+      create: (_) => AuthBloc(authService: AuthService(), userRepository: UserRepository()),
       child: AuthWidgetUI(),
     );
   }
