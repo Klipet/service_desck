@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:service_desk/const/const_colors.dart';
-import 'package:service_desk/data_base/user_model.dart';
+import 'package:service_desk/data_base/data_models/user_model_db.dart';
 import 'package:service_desk/packeges/custom_title_bar.dart';
 import 'package:service_desk/screens/settings_screen.dart';
 import 'package:service_desk/screens/tikets/ticket_table_screen.dart';
-import 'package:service_desk/services/user_service.dart';
 
+
+import '../data_base/user_repository.dart';
 import '../packeges/costom_nav/costom_sidebar.dart';
 import '../packeges/costom_nav/icon_nav.dart';
 import '../packeges/costom_nav/nav_item.dart';
@@ -30,7 +31,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   late PageController _pageController;
   late NavigationProvider _navigationProvider;
   bool _isInitialized = false;
-  late UserService userService;
+  final UserRepository _userRepository = UserRepository();
+  UserModelDB? _user;
 
   static  final List<NavItem> _navItems = [
     NavItem(
@@ -83,15 +85,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
       _isInitialized = true;
     });
-  //  userName();
+    userName();
   }
 
-  String userName() {
-    final savedUser = UserService.getUser();
-    if(savedUser != null){
-      return savedUser.userName;
-    }
-    return '';
+  Future<void> userName() async {
+    final user = await _userRepository.getUser();
+    setState(() => _user = user);
   }
 
 
@@ -122,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               children: [
                 CostomSidebar(
                   items: _navItems,
-                  userName: userName(),
+                  userName: _user?.userName ?? '',
                   selectedIndex: currentPage,
                   onItemSelected: (i) => navigationProvider.goToPage(i),
                 ),

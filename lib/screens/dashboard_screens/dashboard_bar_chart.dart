@@ -13,10 +13,12 @@ import 'package:service_desk/const/const_colors.dart';
 
 import '../../blocs/report_bar_chart_blocs/report_bar_chart_event.dart';
 import '../../blocs/report_dashboard_table_blocs/report_dasboard_table_event.dart';
+import '../../data_base/data_models/user_model_db.dart';
+import '../../data_base/user_repository.dart';
 import '../../models/reports_model/report_post_model.dart';
 import '../../models/reports_model/report_response_model.dart';
 import '../../services/report_service.dart';
-import '../../services/user_service.dart';
+
 
 import '../table_great_tickets/dashboard_great_table.dart';
 
@@ -28,11 +30,11 @@ class DashboardBarChart extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => ReportBarChartBloc(reportService: ReportService()),
+          create: (_) => ReportBarChartBloc(reportService: ReportService(), userRepository: UserRepository() ),
         ),
         BlocProvider(
           create: (_) =>
-              ReportDasboardTableBloc(reportService: ReportService()),
+              ReportDasboardTableBloc(reportService: ReportService(), userRepository: UserRepository()),
         ),
       ],
       child: DashboardBarChartUI(),
@@ -48,53 +50,64 @@ class DashboardBarChartUI extends StatefulWidget {
 }
 
 class _DashboardBarChartUIState extends State<DashboardBarChartUI> {
-  final user = UserService.getUser();
+  final _userRepo = UserRepository();
+  UserModelDB? _user;
   int touchedGroupIndex = -1;
   DateTime dataStart = DateTime.now().subtract(Duration(days: 190));
   DateTime dataEnd = DateTime.now();
 
   @override
   void initState() {
+    super.initState();
+    _loadUserAndFetch();
+  }
+
+  Future<void> _loadUserAndFetch() async {
+    final user = await _userRepo.getUser();
+    if (!mounted) return;
+    setState(() => _user = user);
+
     context.read<ReportBarChartBloc>().add(
       ReportGenerateRequested(
         ReportPostModel(
-          name: 'DashboardPieChart',
-          dateFrom: dataStart,
-          dateTo: dataEnd,
-          showTotalCount: true,
-          filterAuthorId: null,
-          filterStatus: null,
-          filterCategory: null,
-          filterPriority: null,
-          filterUserId: user?.userId ?? 0,
-          groupBy: '2',
-          sortBy: 'date',
-          sortDescending: true,
-          dateGrouping: ''
+            name: 'DashboardPieChart',
+            dateFrom: dataStart,
+            dateTo: dataEnd,
+            showTotalCount: true,
+            filterAuthorId: null,
+            filterStatus: null,
+            filterCategory: null,
+            filterPriority: null,
+            filterUserId: user?.userId ?? 0, // ← уже есть данные
+            groupBy: '2',
+            sortBy: 'date',
+            sortDescending: true,
+            dateGrouping: ''
         ),
       ),
     );
+
     context.read<ReportDasboardTableBloc>().add(
       ReportTableGenerateRequested(
         ReportPostModel(
-          name: 'DashboardPieChart',
-          dateFrom: dataStart,
-          dateTo: dataEnd,
-          showTotalCount: true,
-          filterAuthorId: null,
-          filterStatus: null,
-          filterCategory: null,
-          filterPriority: null,
-          filterUserId: user?.userId ?? 0,
-          groupBy: '6',
-          sortBy: 'date',
-          sortDescending: true,
-          dateGrouping: ''
+            name: 'DashboardPieChart',
+            dateFrom: dataStart,
+            dateTo: dataEnd,
+            showTotalCount: true,
+            filterAuthorId: null,
+            filterStatus: null,
+            filterCategory: null,
+            filterPriority: null,
+            filterUserId: user?.userId ?? 0,
+            groupBy: '6',
+            sortBy: 'date',
+            sortDescending: true,
+            dateGrouping: ''
         ),
       ),
     );
-    super.initState();
   }
+
 
   Widget _titleWidget(bool isDesktop) {
     return Row(

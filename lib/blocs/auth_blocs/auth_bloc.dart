@@ -1,20 +1,20 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../../data_base/user_model.dart';
+
+import '../../data_base/user_repository.dart';
 import '../../models/users_models/loghin_request.dart';
 import '../../models/users_models/loghin_response.dart';
 import '../../services/auth_service.dart';
-import '../../services/user_service.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthService _authService;
-
-  AuthBloc(this._authService) : super(const AuthInitial()) {
+  final AuthService authService;
+  final UserRepository userRepository;
+  AuthBloc({required this.authService, required this.userRepository}) : super(const AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
-    on<LogoutRequested>(_onLogoutRequested);
+  //  on<LogoutRequested>(_onLogoutRequested);
     on<CheckAuthStatus>(_onCheckAuthStatus);
   }
 
@@ -22,7 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     CheckAuthStatus event,
     Emitter<AuthState> emit,
   ) async {
-    final savedUser = UserService.getUser();
+    final savedUser = await userRepository.getUser();
 
     if (savedUser != null &&
         savedUser.autoSavePassword &&
@@ -30,7 +30,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(const AuthLoading());
 
       try {
-        final response = await _authService.login(
+        final response = await authService.login(
           LoginRequest(login: savedUser.login, password: savedUser.password),
         );
 
@@ -50,7 +50,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthLoading());
 
     try {
-      final savedUser = UserService.getUser();
+      final savedUser = await userRepository.getUser();
 
       final String login;
       final String password;
@@ -66,21 +66,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
 
       // Авторизация
-      final response = await _authService.login(
+      final response = await authService.login(
         LoginRequest(login: login, password: password),
       );
-
+      if(response.status == 200){
+        await userRepository.deletePermissions();
+      }
       // Сохраняем пользователя с учётом флага autoSavePassword
-      await UserService.saveUser(
-        UserModel(
-          login: login,
-          password: event.savePass ? password : '',
-          // не храним пароль если флаг выключен
-          autoSavePassword: event.savePass,
-          apiKey: response.apikey,
-          userName: response.user.name,
-          userId: response.user.id,
+      await userRepository.saveUser(
+        loginResponse:  LoginResponse(
+          apikey: response.apikey,
+          user: response.user,
+          status: response.status,
         ),
+        autosave: event.savePass,
+        password: event.savePass ? password : '',
       );
 
       emit(AuthAuthenticated(token: response.apikey, user: response.user));
@@ -90,25 +90,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onLogoutRequested(
-    LogoutRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    // Сохраняем login, но чистим пароль и apiKey
-    final savedUser = UserService.getUser();
-    if (savedUser != null) {
-      await UserService.saveUser(
-        UserModel(
-          login: savedUser.login,
-          password: '',
-          autoSavePassword: savedUser.autoSavePassword,
-          apiKey: '',
-          userName: '',
-          userId: 0
-        ),
-      );
-    }
-
-    emit(const AuthUnauthenticated());
-  }
+//  Future<void> _onLogoutRequested(
+//    LogoutRequested event,
+//    Emitter<AuthState> emit,
+//  ) async {
+//    // Сохраняем login, но чистим пароль и apiKey
+//    final savedUser = UserRepository.getUser();
+//    if (savedUser != null) {
+//      await UserRepository.saveUser(
+//        UserModel(
+//          login: savedUser.login,
+//          password: '',
+//          autoSavePassword: savedUser.autoSavePassword,
+//          apiKey: '',
+//          userName: '',
+//          userId: 0
+//        ),
+//      );
+//    }
+//
+//    emit(const AuthUnauthenticated());
+//  }
 }

@@ -7,12 +7,13 @@ import 'package:service_desk/models/reports_model/report_response_model.dart';
 import '../../blocs/report_dashboard_tiket_inputs_bloc/report_table_input_bloc.dart';
 import '../../blocs/report_dashboard_tiket_inputs_bloc/report_table_input_event.dart';
 import '../../blocs/report_dashboard_tiket_inputs_bloc/report_table_input_state.dart';
+import '../../data_base/data_models/user_model_db.dart';
+import '../../data_base/user_repository.dart';
 import '../../models/reports_model/report_post_model.dart';
 import '../../packeges/costom_bar/models.dart';
 import '../../packeges/costom_bar/sbc_theme.dart';
 import '../../packeges/costom_bar/stacked_bar_chart.dart';
 import '../../services/report_service.dart';
-import '../../services/user_service.dart';
 import '../../utils/period_type_dashboard_one.dart';
 import 'package:flutter/material.dart';
 
@@ -376,7 +377,7 @@ class DashboardOneTiketInt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ReportTableInputBloc(reportService: ReportService()),
+      create: (_) => ReportTableInputBloc(reportService: ReportService(), userRepository: UserRepository()),
       child: _View(
         startData: startData,
         endData: endData,
@@ -405,9 +406,14 @@ class _View extends StatefulWidget {
 }
 
 class _ViewState extends State<_View> {
-  final _user = UserService.getUser();
+  final _userRepo = UserRepository();
+  UserModelDB? _user;
 
-  void _load() {
+
+  Future<void> _load() async {
+    final user = await _userRepo.getUser();
+    if (!mounted) return;
+    setState(() => _user = user);
     context.read<ReportTableInputBloc>().add(
       ReportTableInputRequested(
         ReportPostModel(

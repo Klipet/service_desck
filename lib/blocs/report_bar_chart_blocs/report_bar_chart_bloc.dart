@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:service_desk/blocs/report_bar_chart_blocs/report_bar_chart_event.dart';
 
+import '../../data_base/user_repository.dart';
 import '../../models/reports_model/chart_item.dart';
 import '../../services/report_service.dart';
-import '../../services/user_service.dart';
 import 'report_bar_chart_state.dart';
 
 
 class ReportBarChartBloc extends Bloc<ReportBarChartEvent, ReportBarChartState> {
   final ReportService reportService;
-
-  ReportBarChartBloc({required this.reportService}) : super(ReportInitial()) {
+  final UserRepository userRepository;
+  ReportBarChartBloc({ required this.userRepository, required this.reportService}) : super(ReportInitial()) {
     on<ReportGenerateRequested>(_onGenerateRequested);
   }
 
@@ -20,7 +20,7 @@ class ReportBarChartBloc extends Bloc<ReportBarChartEvent, ReportBarChartState> 
     emit(ReportLoading());
     try {
 
-      final user = UserService.getUser();
+      final user = await userRepository.getUser();
       final String apiKeyUser = user?.apiKey ?? '';
       final report = await reportService.generate(model: event.model, apiKey: apiKeyUser, );
       emit(ReportSuccess(report));

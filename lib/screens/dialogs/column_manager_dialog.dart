@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:service_desk/const/const_colors.dart';
 
 import '../../models/model_data_table_tiket/column_config.dart';
 
@@ -6,10 +9,7 @@ class ColumnManagerDialog extends StatefulWidget {
   final List<ColumnConfig> configs;
   final VoidCallback onChanged;
 
-  const ColumnManagerDialog({
-    required this.configs,
-    required this.onChanged,
-  });
+  const ColumnManagerDialog({required this.configs, required this.onChanged});
 
   @override
   State<ColumnManagerDialog> createState() => ColumnManagerDialogState();
@@ -21,40 +21,97 @@ class ColumnManagerDialogState extends State<ColumnManagerDialog> {
     final visibleCount = widget.configs.where((c) => c.visible).length;
 
     return AlertDialog(
-      title: const Text('Управление колонками'),
-      contentPadding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
-      content: SizedBox(
-        width: 320,
+      backgroundColor: AppColors.backgroundColor,
+
+      title: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(color: AppColors.backgroundColor),
+            child: Text('Управление колонками', style: GoogleFonts.poppins(
+              color: AppColors.textColorOne,
+              fontWeight: FontWeight.w700,
+              fontSize: 20.sp
+            ),),
+          ),
+          Spacer(),
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Icon(Icons.close_rounded, color: Colors.black, size: 20.r),
+          ),
+        ],
+      ),
+      contentPadding: EdgeInsets.only(left: 12.w, right: 12.w, bottom: 10.h),
+      content: Container(
+        decoration: BoxDecoration(
+          color: AppColors.backgroundColor,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        width: 320.w,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(
-                    onPressed: () {
+                  GestureDetector(
+                    onTap: () {
                       setState(() {
                         for (final c in widget.configs) {
-                          if (c.columnName == 'id') continue; // <- защита
+                          if (c.columnName == 'id' || c.columnName == 'checkbox' || c.columnName == 'newMessage' ) continue; // <- защита
                           c.visible = true;
                         }
                       });
                       widget.onChanged();
                     },
-                    child: const Text('Все'),
+                    child: Container(
+                      width: 70.w,
+                      height: 15.h,
+                      alignment: Alignment.center,
+                    //  margin: EdgeInsets.only(right: 8.w, bottom: 5.h),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: AppColors.gradientColorTop),
+                        borderRadius: BorderRadiusGeometry.circular(100.r),
+
+                      ),
+                      child: Text('Все', style: GoogleFonts.poppins(
+                        color: AppColors.backgroundColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 10.sp
+                      ),),
+                    ),
                   ),
-                  TextButton(
-                    onPressed: () {
+                  SizedBox(width: 10.w,),
+                  GestureDetector(
+                    onTap: () {
                       setState(() {
                         // Оставляем хотя бы одну
                         for (int i = 1; i < widget.configs.length; i++) {
+                          if (widget.configs[i].columnName == 'id' ||
+                              widget.configs[i].columnName == 'checkbox' ||
+                              widget.configs[i].columnName == 'newMessage') continue;
                           widget.configs[i].visible = false;
                         }
                       });
                       widget.onChanged();
                     },
-                    child: const Text('Снять все'),
+                    child: Container(
+                      width: 70.w,
+                      height: 15.h,
+                    //  margin: EdgeInsets.only(right: 8.w, bottom: 5.h),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: AppColors.gradientColorTop),
+                        borderRadius: BorderRadiusGeometry.circular(100.r),
+
+                      ),
+                      child: Text('Снять все', style: GoogleFonts.poppins(
+                          color: AppColors.backgroundColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 10.sp
+                      ),),
+                    ),
                   ),
                   const Spacer(),
                   Text(
@@ -66,7 +123,7 @@ class ColumnManagerDialogState extends State<ColumnManagerDialog> {
             ),
             const Divider(height: 1),
             ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 400),
+              constraints: BoxConstraints(maxHeight: 400.h),
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: widget.configs.length,
@@ -74,19 +131,50 @@ class ColumnManagerDialogState extends State<ColumnManagerDialog> {
                   final config = widget.configs[i];
                   return CheckboxListTile(
                     dense: true,
-                    title: Text(config.label, style: const TextStyle(fontSize: 14)),
+                    checkColor: AppColors.dataGreadColorTitle,
+                    hoverColor: AppColors.backgroundColor,
+                    activeColor: AppColors.backgroundColor,
+                    checkboxScaleFactor: 1.4,
+                    // 🔥 ВАЖНО
+                    fillColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.disabled)) {
+                        return Colors.transparent; // фон отключенного
+                      }
+                      return AppColors.backgroundColor;
+                    }),
+
+                    side: BorderSide(
+                      color: config.visible
+                          ? AppColors.dataGreadColorTitle
+                          : AppColors.textColorOne, // цвет рамки когда false
+                      width: 2,
+                    ),
+
+                    title: Text(
+                      config.label,
+                      style: GoogleFonts.poppins(
+                          fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textTitleFl
+                      ),
+                    ),
                     subtitle: Text(
                       config.columnName,
-                      style: const TextStyle(fontSize: 11),
+                      style: GoogleFonts.poppins(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.textTitleFl
+                      ),
                     ),
                     value: config.visible,
-                    onChanged: config.columnName == 'id'
+                    onChanged: config.columnName == 'id' || config.columnName == 'checkbox' || config.columnName == 'newMessage'
+
                         ? null
                         : (val) {
-                      if (val == false && visibleCount <= 1) return;
-                      setState(() => config.visible = val ?? true);
-                      widget.onChanged();
-                    },
+                            if (val == false && visibleCount <= 1) return;
+                            setState(() => config.visible = val ?? true);
+                            widget.onChanged();
+                          },
                   );
                 },
               ),
@@ -94,12 +182,6 @@ class ColumnManagerDialogState extends State<ColumnManagerDialog> {
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Закрыть'),
-        ),
-      ],
     );
   }
 }
