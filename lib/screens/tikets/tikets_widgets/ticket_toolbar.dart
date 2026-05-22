@@ -521,7 +521,7 @@ class _ActionMessageActualButton extends StatelessWidget {
   }
 }
 
-class _DropDawnWidget extends StatelessWidget {
+class _DropDawnWidget extends StatefulWidget {
   final List<String> label;
   final String selectedStatus;
   final ValueChanged<String?> onStatusChanged;
@@ -534,63 +534,140 @@ class _DropDawnWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final textStyle = GoogleFonts.poppins(
-      fontWeight: FontWeight.w500,
-      fontSize: 10.sp.clamp(15, 20),
-      color: AppColors.textTitleFl,
-    );
+  State<_DropDawnWidget> createState() => _DropDawnWidgetState();
+}
 
-    return Container(
-      height: 32.h,
-      padding: EdgeInsets.only(left: 8.w, right: 8.w),
-      alignment: Alignment.centerLeft,
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCardColor,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: AppColors.textTitleFl, width: 1.w),
-      ),
-      child: DropdownButton<String?>(
-        value: selectedStatus.isEmpty ? null : selectedStatus,
-        isExpanded: true,
-        isDense: true,
-        underline: SizedBox.shrink(),
-        // ✅ убирает подчёркивание
-        icon: SvgPicture.asset(
-          "assets/image/icon_drop_dawn/drop_dawn.svg",
-          width: 16.w,
-          height: 16.h,
-        ),
-        iconSize: 16.sp,
-        alignment: Alignment.centerLeft,
-        dropdownColor: AppColors.backgroundColor,
-        borderRadius: BorderRadius.circular(10.r),
-        hint: Text(
-          'Выбери статус',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w500,
-            fontSize: 10.sp.clamp(10, 20),
-            color: AppColors.textTitleFl,
+class _DropDawnWidgetState extends State<_DropDawnWidget> {
+
+  final LayerLink _layerLink = LayerLink();
+  bool _isOpen = false;
+  final OverlayPortalController _controller = OverlayPortalController();
+
+
+  @override
+  void dispose() {
+    if (_controller.isShowing) {
+      _controller.hide();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return OverlayPortal(
+      controller: _controller,
+      // ✅ overlayChildBuilder рисуется ПОД основным виджетом автоматически
+      overlayChildBuilder: (context) {
+        final RenderBox box = this.context.findRenderObject() as RenderBox;
+        final size = box.size;
+        final offset = box.localToGlobal(Offset.zero);
+
+        return Positioned(
+          left: offset.dx,
+          top: offset.dy + size.height - 1,
+          width: size.width,
+          child: _DropdownMenu(
+            labels: widget.label,
+            onSelect: (value) {
+              widget.onStatusChanged(value);
+              _controller.hide();
+              setState(() => _isOpen = false);
+            },
           ),
-        ),
-        items: [
-          DropdownMenuItem<String?>(
-            value: null,
-            child: Text('Все статусы', style: textStyle),
-          ),
-          ...label.map(
-            (status) => status == ''
-                ? DropdownMenuItem<String?>(
-                    value: '',
-                    child: Text('Без статуса', style: textStyle),
-                  )
-                : DropdownMenuItem<String?>(
-                    value: status,
-                    child: Text(status, style: textStyle),
+        );
+      },
+      child: CompositedTransformTarget(
+        link: _layerLink,
+        child: GestureDetector(
+          onTap: () {
+            setState(() => _isOpen = !_isOpen);
+            _isOpen ? _controller.show() : _controller.hide();
+          },
+          child: Container(
+            height:  32.h ,
+            padding: EdgeInsets.symmetric(horizontal: 14.w),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundColor,
+              borderRadius: _isOpen
+                  ? BorderRadius.vertical(top: Radius.circular(20.r))
+                  : BorderRadius.circular(20.r),
+              border: Border.all(color: AppColors.textTitleFl, width: 1.w),
+            ),
+            child: Stack(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    widget.selectedStatus.isEmpty ? "Все заявки" :  widget.selectedStatus ,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textTitleFl,
+                    ),
                   ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child:  SvgPicture.asset('assets/image/icon_drop_dawn/drop_dawn.svg', width: 22.w, height: 22.h,),
+
+                ),
+              ],
+            ),
           ),
-        ],
-        onChanged: onStatusChanged,
+        ),
+      ),
+    );
+  }
+}
+
+class _DropdownMenu extends StatelessWidget {
+  final List<String> labels;
+  final ValueChanged<String> onSelect;
+
+  const _DropdownMenu({required this.labels, required this.onSelect});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.h),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundColor,
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(12.r)),
+          border: Border(
+            left: BorderSide(color: AppColors.textTitleFl, width: 1.w),
+            right: BorderSide(color: AppColors.textTitleFl, width: 1.w),
+            bottom: BorderSide(color: AppColors.textTitleFl, width: 1.w),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: labels.map((label) {
+            return InkWell(
+              onTap: () => onSelect(label),
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: label != labels.last
+                        ? BorderSide(color: AppColors.textTitleFl, width: 0.5.w)
+                        : BorderSide.none,
+                  ),
+                ),
+                child: Text(
+                  label.isEmpty ? "Все заявки" : label ,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textTitleFl,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }

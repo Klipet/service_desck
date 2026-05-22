@@ -5,7 +5,10 @@ import '../../screens/tikets/tikets_widgets/ticket_tab_filter.dart';
 
 abstract class TicketState {}
 
-class TicketInitial extends TicketState {}
+class TicketInitial extends TicketState {
+  @override
+  List<Object> get props => [];
+}
 
 class TicketLoading extends TicketState {}
 
@@ -28,4 +31,9 @@ class CommentLoaded extends TicketState {
   final TicketCommentModel tickets;
 
   CommentLoaded(this.tickets);
+}
+class TicketByIdLoaded extends TicketState {
+  final TicketResponse tickets;
+
+  TicketByIdLoaded(this.tickets);
 }

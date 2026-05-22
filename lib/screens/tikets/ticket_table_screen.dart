@@ -56,6 +56,7 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
   List<TicketResponse> _allTickets = [];
   List<TicketResponse> _filteredTickets = [];
 
+  List<int> ticketSelect = [];
 
   @override
   void initState() {
@@ -107,8 +108,8 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
           tickets: _filteredTickets,
           columnConfigs: _columnConfigs,
           onSelectionChanged: (ids) {
-            // 👈
-            print('Выбраны тикеты: $ids');
+            ticketSelect = ids;
+            print("Выбраны тикеты TiketSelect: ${ticketSelect.length}");
           },
         );
       } else {
@@ -187,16 +188,15 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
               _applyFilter();
             },
             onCreate: () {
-              navigationProvider.goToPage(2);
+              navigationProvider.goToPageAndDestroy(2);
             },
             onEdit: (){
-
+              _editTicket(navigationProvider ,ticketSelect);
             },
             onManageColumns: _showColumnManager,
             allTickets: _allTickets,
             onLoadAll: () => context.read<TicketBloc>().add(LoadTickets()),
             onLoadMine: () => context.read<TicketBloc>().add(LoadMyTickets()),
-            // ✅ Убран лишний setState — add() сам триггерит ребилд через BLoC
             onSearch: (query) =>
                 context.read<TicketBloc>().add(TicketSearch(query)),
 
@@ -222,7 +222,6 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (state is TicketLoaded) {
-                  // ✅ Ждём пока _dataSource и _columnConfigs будут готовы
                   if (_dataSource == null || _columnConfigs.isEmpty) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -237,10 +236,7 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
                         _columnWidths[name] = width;
                         _settingsService.saveColumnWidths(_columnWidths);
                       },
-                      onSelectionChanged: (ids) {
-                        // 👈
-                        print('Выбраны тикеты: $ids');
-                      },
+                      onSelectionChanged: (ids) {},
                       onColumnMoved: _onColumnMoved,
                     ),
                   );
@@ -257,7 +253,22 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
       ),
     );
   }
-  void editTicket(){
+  void _editTicket(NavigationProvider navigationProvider,  List<int> select) {
+    if (select.length > 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Выберите только одну заявку для редактирования")),
+      );
+      return;
+    }
 
+    if (select.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Выберите заявку для редактирования")),
+      );
+      return;
+    }
+
+    final ticketId = select.first;
+    navigationProvider.goToPageAndDestroy(2, ticketId: ticketId); // передаём ID
   }
 }

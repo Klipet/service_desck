@@ -15,7 +15,7 @@ import '../packeges/costom_nav/costom_sidebar.dart';
 import '../packeges/costom_nav/icon_nav.dart';
 import '../packeges/costom_nav/nav_item.dart';
 import '../utils/navigator_provider.dart';
-import 'create_tiket_screen.dart';
+import 'ticket_detail_screens/ticket_detail_page.dart';
 import 'dashboard_screens/dashboard_screen.dart';
 import 'my_tickets_screen.dart';
 
@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       TicketScreen(),
                       Padding(
                         padding: const EdgeInsets.only(right: 24),
-                        child: MyTicketsScreen(),
+                        child: TicketDetailPage(),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 24),
@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 24),
-                        child: CreateTicketScreen(),
+                        child: TicketDetailPageUI(),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 24),

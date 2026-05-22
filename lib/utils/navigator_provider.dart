@@ -3,9 +3,10 @@ class NavigationProvider extends ChangeNotifier {
   int _currentPageIndex = 0;
   Map<String, dynamic> _pageData = {};
   PageController? _pageController;
+  int? _ticketId;
 
   Function(int oldIndex, int newIndex)? onIndexChanged;
-
+  int? get ticketId => _ticketId; // геттер для доступа снаружи
   int get currentPageIndex => _currentPageIndex;
 
   // Установить PageController
@@ -35,11 +36,8 @@ class NavigationProvider extends ChangeNotifier {
   }
 
   /// Переход на страницу с передачей данных
-  void goToPageAndDestroy(int index, {Map<String, dynamic>? data}) {
-    print('📤 Переход на страницу $index с данными: $data');
-    if (data != null) {
-      _pageData = data;
-    }
+  void goToPageAndDestroy(int index, {int? ticketId}) {
+    _ticketId = ticketId;
     _currentPageIndex = index;
     if (_pageController != null && _pageController!.hasClients) {
       _pageController!.jumpToPage(index);
@@ -65,12 +63,17 @@ class NavigationProvider extends ChangeNotifier {
   void updatePageIndex(int index) {
     print('updatePageIndex $currentPageIndex $index');
     if (_currentPageIndex != index) {
-      print('📍 Обновление индекса: $index');
-
       _currentPageIndex = index;
       notifyListeners();
     }
   }
+
+
+  void goToTicketDetail() {
+    _ticketId = null;
+    goToPageAndDestroy(2); // номер страницы TicketDetailPage
+  }
+
 
   /// Получить данные страницы
   T? getPageData<T>(String key) {

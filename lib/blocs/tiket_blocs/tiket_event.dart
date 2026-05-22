@@ -24,4 +24,14 @@ class TicketSearch extends TicketEvent{
   TicketSearch(this.search);
 }
 
+class TicketByIdSearch extends TicketEvent{
+  final int? search;
+  TicketByIdSearch(this.search);
+}
+
+class ResetTicket extends TicketEvent {
+  @override
+  List<Object> get props => [];
+}
+
 class LoadMyTickets extends TicketEvent {}

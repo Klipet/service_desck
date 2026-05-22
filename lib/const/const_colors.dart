@@ -11,6 +11,8 @@ class AppColors{
   static final backgroundColor = HexColor("#FFFFFF");
   static final btColor = HexColor("#88A838");
   static final textTitleFl = HexColor("#446158");
+  static final colorDeadLine = Color(0x1AD90505);
+  static final colorDeadLineHover = Color(0xFFF59B001A);
   static final textColorBlack = HexColor("#272C1A");
   static final dorderError = Colors.red;
   static final colorButtonTiket = HexColor("#F0F0F0");

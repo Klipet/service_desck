@@ -96,6 +96,23 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
         emit(TicketError(e.toString()));
       }
     });
+    on<TicketByIdSearch>(_ticketById);
+    on<ResetTicket>((event, emit) {emit(TicketInitial());});
+  }
+
+
+  Future<void> _ticketById( TicketByIdSearch event,
+      Emitter<TicketState> emit,) async{
+    emit(TicketLoading());
+    try{
+      final savedUser = await userRepository.getUser();
+      final apiKey = savedUser?.apiKey ?? '';
+      final ticket = await ticketService.tiketById(ticketId: event.search ?? 0, apiKey: apiKey);
+      emit(TicketByIdLoaded(ticket));
+
+    }catch(e){
+      emit(TicketError(e.toString()));
+    }
   }
 
 }
