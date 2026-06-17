@@ -40,8 +40,7 @@ Future<void> main() async {
   });
 
   final ticketBloc = TicketBloc(ticketService: TicketService(), userRepository: UserRepository())..add(LoadTickets());
-  final hub = HubConnecterR(ticketBloc);
-
+  final hub = HubConnecterR.init(ticketBloc);
   // unawaited — не блокируем запуск приложения
   unawaited(hub.startWithAutoReconnect());
   runApp(

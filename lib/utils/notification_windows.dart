@@ -1,7 +1,7 @@
-import 'package:service_desk/models/tiket_comment/ticket_comment_model.dart';
 import 'package:windows_notification/notification_message.dart';
 import 'package:windows_notification/windows_notification.dart';
 
+import '../models/ticket_message/ticket_comment_model.dart';
 import '../models/tikets_models/tiket_response.dart';
 
 
@@ -40,7 +40,7 @@ class NotificationWindows{
   }
 
 
-  void showCommentNotification(TicketCommentModel ticket) {
+  void showCommentNotification(TicketMessageModel ticket) {
 
     final template = '''
 <toast>

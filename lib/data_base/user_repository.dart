@@ -55,6 +55,13 @@ class UserRepository {
     final user = await isar.userModelDBs.where().findFirst();
     return user?.id;
   }
+  // Получить пользователя
+  Future <String?> getUserApikey() async {
+    final isar = await InitIsar.init();
+    final user = await isar.userModelDBs.where().findFirst();
+    return user?.apiKey;
+  }
+
   Future <void> deletePermissions() async {
     final isar = await InitIsar.init();
     await isar.writeTxn(() async{

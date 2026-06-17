@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:service_desk/const/const_colors.dart';
+import 'package:service_desk/screens/dialogs/ticket_marge_dialog.dart';
 
 import '../../blocs/tiket_blocs/tiket_bloc.dart';
 import '../../blocs/tiket_blocs/tiket_event.dart';
@@ -85,6 +86,7 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
   List<String> get _uniqueStatuses =>
       _allTickets.map((t) => t.stateName).whereType<String>().toSet().toList();
 
+
   List<TicketResponse> _sorted(List<TicketResponse> list) =>
       List.from(list)..sort((a, b) => b.id.compareTo(a.id));
 
@@ -96,7 +98,7 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
 
   void _applyFilter() {
     if (_columnConfigs.isEmpty) return;
-    final filtered = _selectedStatus == null
+    final filtered = _selectedStatus == null || _selectedStatus == 'Все заявки'
         ? _sorted(_allTickets)
         : _sorted(
             _allTickets.where((t) => t.stateName == _selectedStatus).toList(),
@@ -109,7 +111,6 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
           columnConfigs: _columnConfigs,
           onSelectionChanged: (ids) {
             ticketSelect = ids;
-            print("Выбраны тикеты TiketSelect: ${ticketSelect.length}");
           },
         );
       } else {
@@ -176,10 +177,12 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
   @override
   Widget build(BuildContext context) {
     final navigationProvider = Provider.of<NavigationProvider>(context);
+  //  print("Главная заявка, Остальные заявки ${_uniqueStatuses.join(', ')}");
     return Scaffold(
       body: Column(
         children: [
           // Просто передаёт данные вниз — сам не строит UI
+
           TicketToolbar(
             statuses: _uniqueStatuses,
             selectedStatus: _selectedStatus,
@@ -190,6 +193,9 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
             onCreate: () {
               navigationProvider.goToPageAndDestroy(2);
             },
+            onAttach: (){
+              _alipireDialog(ticketSelect);
+            },
             onEdit: (){
               _editTicket(navigationProvider ,ticketSelect);
             },
@@ -199,7 +205,7 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
             onLoadMine: () => context.read<TicketBloc>().add(LoadMyTickets()),
             onSearch: (query) =>
                 context.read<TicketBloc>().add(TicketSearch(query)),
-
+            responseGet:() => context.read<TicketBloc>().add(FetchAllMessages()),
           ),
 
           //Нижняя часть Списка
@@ -216,8 +222,6 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
                 }
               },
               builder: (context, state) {
-                print("🔄 UI rebuild: ${state.runtimeType}");
-
                 if (state is TicketLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -270,5 +274,46 @@ class _TicketTableScreenUIState extends State<TicketTableScreenUI> {
 
     final ticketId = select.first;
     navigationProvider.goToPageAndDestroy(2, ticketId: ticketId); // передаём ID
+  }
+
+  void _alipireDialog(List<int> select){
+    if (select.isEmpty || select.length == 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("вы не выбрали заявку редактирования")),
+      );
+      return;
+    }
+
+    final bloc = context.read<TicketBloc>();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: bloc,
+        child: BlocListener<TicketBloc, TicketState>(
+          listener: (context, state) {
+            if (state is TicketMargetSuccess) {
+              Navigator.of(context).pop();
+              bloc.add(LoadTickets());
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(backgroundColor: Colors.green, content: Text(state.tickets.message)),
+              );
+            }
+            if (state is TicketMargetError) {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(backgroundColor: Colors.red, content: Text(state.tickets.message)),
+              );
+            }
+          },
+          child: TicketMargeDialog(
+            select: select,
+            onMerge: (primaryId, secondaryIds) {
+              bloc.add(MenageTickets(primoryTiket: primaryId, secondariTikets: secondaryIds));
+            },
+          ),
+        ),
+      ),
+    );
   }
 }

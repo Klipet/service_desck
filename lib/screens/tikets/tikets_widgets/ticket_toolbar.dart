@@ -1,19 +1,21 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:service_desk/data_base/data_models/user_model_permisions_db.dart';
 import 'package:service_desk/data_base/user_repository.dart';
 
+import '../../../blocs/tiket_blocs/tiket_bloc.dart';
+import '../../../blocs/tiket_blocs/tiket_state.dart';
 import '../../../const/const_colors.dart';
 import '../../../data_base/data_models/user_model_db.dart';
 import '../../../models/tikets_models/tiket_response.dart';
 import 'ticket_tab_filter.dart';
 
 class TicketToolbar extends StatefulWidget {
-  final List<String> statuses;
-  final String? selectedStatus;
+
 
   final List<TicketResponse> allTickets;
 
@@ -25,6 +27,12 @@ class TicketToolbar extends StatefulWidget {
 
   //статусы дробдаун
   final ValueChanged<String?> onStatusChanged;
+  final List<String> statuses;
+  final String? selectedStatus;
+
+  //response primite
+  final VoidCallback? responseGet;
+
 
   // кнопки с тикетами
   final VoidCallback? onCreate;
@@ -50,6 +58,7 @@ class TicketToolbar extends StatefulWidget {
     this.onAttach,
     this.onAssign,
     this.onDelete,
+    this.responseGet,
   });
 
   @override
@@ -270,8 +279,8 @@ class _TicketToolbarState extends State<TicketToolbar> {
                     height: 32.h,
                     child: _DropDawnWidget(
                       label: widget.statuses,
-                      selectedStatus: widget.selectedStatus ?? '',
-                      onStatusChanged: widget.onStatusChanged,
+                      selectedStatus: widget.selectedStatus ?? 'Все заявки',
+                      onStatusChanged: widget.onStatusChanged ,
                     ),
                   ),
                   SizedBox(width: 8.w),
@@ -333,12 +342,21 @@ class _TicketToolbarState extends State<TicketToolbar> {
                   ),
                   // Răspunsuri primite — бейдж потом добавишь
                   SizedBox(width: 4.w),
-                  _ActionMessageActualButton(
-                    icon: 'assets/image/tool_bar_ticket/inbox.svg',
-                    label: 'Răspunsuri primite',
-                    width: 151.w,
-                    countMessage: 50,
-                  ),
+                  BlocBuilder<TicketBloc, TicketState>(
+                    builder: (context, state) {
+                      final count = state is TicketMessageLoaded
+                          ? state.unreadCount
+                          : 0;
+
+                      return _ActionMessageActualButton(
+                        onTap: widget.responseGet,
+                        icon: 'assets/image/tool_bar_ticket/inbox.svg',
+                        label: 'Răspunsuri primite',
+                        width: 151.w,
+                        countMessage: count,
+                      );
+                    },
+                  )
                 ],
               ),
             ),
@@ -501,7 +519,6 @@ class _ActionMessageActualButton extends StatelessWidget {
               width: 20.w,
               height: 20.h,
               alignment: Alignment.center,
-              //  margin: EdgeInsets.only(top: 2.h,),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: AppColors.gradientColor,
@@ -554,6 +571,7 @@ class _DropDawnWidgetState extends State<_DropDawnWidget> {
 
   @override
   Widget build(BuildContext context) {
+
     return OverlayPortal(
       controller: _controller,
       // ✅ overlayChildBuilder рисуется ПОД основным виджетом автоматически
@@ -567,7 +585,7 @@ class _DropDawnWidgetState extends State<_DropDawnWidget> {
           top: offset.dy + size.height - 1,
           width: size.width,
           child: _DropdownMenu(
-            labels: widget.label,
+            labels:  widget.label,
             onSelect: (value) {
               widget.onStatusChanged(value);
               _controller.hide();
@@ -598,7 +616,7 @@ class _DropDawnWidgetState extends State<_DropDawnWidget> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    widget.selectedStatus.isEmpty ? "Все заявки" :  widget.selectedStatus ,
+                    widget.selectedStatus == '' ? "Все заявки" :  widget.selectedStatus ,
                     style: GoogleFonts.poppins(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
@@ -628,6 +646,8 @@ class _DropdownMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final allLabels = [ ...labels, "Все заявки"];
+
     return Material(
       color: Colors.transparent,
       child: Container(
@@ -643,7 +663,7 @@ class _DropdownMenu extends StatelessWidget {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: labels.map((label) {
+          children: allLabels.map((label) {
             return InkWell(
               onTap: () => onSelect(label),
               child: Container(
@@ -657,7 +677,8 @@ class _DropdownMenu extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  label.isEmpty ? "Все заявки" : label ,
+                  label,
+                //  label == '' ? "Все заявки" : label ,
                   style: GoogleFonts.poppins(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,

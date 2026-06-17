@@ -137,9 +137,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         padding: EdgeInsets.only(right: 16.w),
                         child: DashboardScreen(),
                       ),
-                      TicketScreen(),
                       Padding(
-                        padding: const EdgeInsets.only(right: 24),
+                        padding: EdgeInsets.only(right: 1.w),
+                        child: TicketScreen(),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(right: 1.w),
                         child: TicketDetailPage(),
                       ),
                       Padding(

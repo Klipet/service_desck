@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,6 +14,8 @@ import 'package:service_desk/services/auth_service.dart';
 
 import '../../blocs/auth_blocs/auth_event.dart';
 import '../../const/const_colors.dart';
+import '../../data_base/repository/dictionaries_repository.dart';
+import '../../services/hub_connecter.dart';
 
 class AuthWidget extends StatelessWidget {
   const AuthWidget({super.key});
@@ -63,6 +67,10 @@ class _AuthWidgetUIState extends State<AuthWidgetUI> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state){
         if (state is AuthAuthenticated) {
+          HubConnecterR.instance.restartConnection();
+          DictionariesRepository().loadAll(apiKey: state.token).catchError((e) {
+            debugPrint('Failed to load dictionaries: $e');
+          });
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.of(context).pushNamedAndRemoveUntil(
               AppRouter.home,

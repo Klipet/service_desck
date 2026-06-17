@@ -2,6 +2,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:service_desk/blocs/tiket_blocs/tiket_event.dart';
 import 'package:service_desk/blocs/tiket_blocs/tiket_state.dart';
+import 'package:service_desk/models/tikets_models/ticket_marge_model.dart';
 import 'package:service_desk/models/tikets_models/tiket_response.dart';
 import 'package:service_desk/services/ticket_by_id_service.dart';
 
@@ -44,10 +45,7 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
 
     on<AddComment>((event, emit) {
       final current = state;
-
       emit(CommentLoaded(event.ticketModel));
-
-      print("Я щас тут ${current.runtimeType}");
       if (current is TicketLoaded) {
         print("возвращаем список обратно ${current.runtimeType}");
         emit(current); // 👈 возвращаем список обратно
@@ -96,23 +94,43 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
         emit(TicketError(e.toString()));
       }
     });
-    on<TicketByIdSearch>(_ticketById);
+
     on<ResetTicket>((event, emit) {emit(TicketInitial());});
+    on<MenageTickets>(_menageTiketsPost);
+    on<FetchAllMessages>(_onFetchAllMessages);
   }
 
 
-  Future<void> _ticketById( TicketByIdSearch event,
-      Emitter<TicketState> emit,) async{
+
+
+  Future<void> _menageTiketsPost(MenageTickets event, Emitter<TicketState> emit) async {
     emit(TicketLoading());
-    try{
+    try {
       final savedUser = await userRepository.getUser();
       final apiKey = savedUser?.apiKey ?? '';
-      final ticket = await ticketService.tiketById(ticketId: event.search ?? 0, apiKey: apiKey);
-      emit(TicketByIdLoaded(ticket));
 
-    }catch(e){
-      emit(TicketError(e.toString()));
+      final request = TicketMargeModel(
+        prymoryTiketId: event.primoryTiket,
+        secindTiketId: event.secondariTikets,
+      );
+      final result = await ticketService.menageTickets(apiKey: apiKey, request: request,);
+      emit(TicketMargetSuccess(result));
+
+    } catch (e) {
+      emit(TicketMargetError(MergeTicketResponse(state: 404, message: "Ошибка")));
     }
+  }
+
+
+  Future<void> _onFetchAllMessages(
+      FetchAllMessages event,
+      Emitter<TicketState> emit,
+      ) async {
+    emit(MessageLoad());
+    final savedUser = await userRepository.getUser();
+    final apiKey = savedUser?.apiKey ?? '';
+    final result = await ticketService.getMessageTicket(apiKey: apiKey);
+    emit(TicketMessageLoaded(messages: result));
   }
 
 }

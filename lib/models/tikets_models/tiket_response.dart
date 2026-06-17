@@ -1,6 +1,6 @@
-import 'package:service_desk/models/tiket_comment/ticket_comment_model.dart';
 import 'package:service_desk/models/tikets_files/tiket_files_response.dart';
 
+import '../ticket_message/ticket_comment_model.dart';
 import '../tikets_solutions/tiket_solution_response.dart';
 
 class TicketResponse {
@@ -40,7 +40,7 @@ class TicketResponse {
   final DateTime dueDate;
   final List<TicketFileResponse> files;
   final List<TicketSolutionResponse> solution;
-  final List<TicketCommentModel> comment;
+  final List<TicketMessageModel> comment;
 
   TicketResponse({
     required this.id,
@@ -135,7 +135,7 @@ class TicketResponse {
       comment: json['comment'] == null
           ? []
           : (json['comment'] as List)
-          .map((e) => TicketCommentModel.fromJson(e))
+          .map((e) => TicketMessageModel.fromJson(e))
           .toList(),
     );
   }

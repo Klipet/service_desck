@@ -3,7 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../models/model_data_table_tiket/column_config.dart';
 
-final String url = 'http://localhost:5000';
+//final String url = 'http://localhost:5000';
+final String url = 'https://dev-servicedesk.edi.md';
 
 const prefKey = 'ticket_grid_columns';
 const prefWidth = 'width';
