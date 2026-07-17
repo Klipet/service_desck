@@ -1,18 +1,27 @@
 part of 'company_bloc.dart';
 
 @immutable
-sealed class CompanyState {}
-
-final class CompanyInitial extends CompanyState {}
-
-final class CompanyLoaded extends CompanyState {
-  final List<CompanyModel> company;
-  CompanyLoaded(this.company);
+abstract class CompanyState extends Equatable {
+  @override
+  List<Object?> get props => [];
 }
-final class CompanyLoading extends CompanyState{}
 
-final class CompanyError extends CompanyState{
+class CompanyInitial extends CompanyState {}
+
+class CompanyLoading extends CompanyState {}
+
+class CompanyLoaded extends CompanyState {
+  final List<CompanyModel> companies;
+   CompanyLoaded(this.companies);
+
+  @override
+  List<Object?> get props => [companies];
+}
+
+class CompanyError extends CompanyState {
   final String message;
   CompanyError(this.message);
-}
 
+  @override
+  List<Object?> get props => [message];
+}

@@ -39,6 +39,11 @@ dependencies:
   fl_chart: ^1.2.0
   dropdown_button2: ^3.1.0
   reorderables: ^0.6.0
+  collection: ^1.18.0
+  flutter_quill: ^11.5.1
+  flutter_quill_extensions: ^11.0.0
+  file_picker: ^8.1.4
+  desktop_drop: ^0.7.1
   intl: ^0.20.2
 
 
@@ -127,3 +132,5 @@ flutter_launcher_icons:
     generate: true
 
   image_path: "assets/image/big_logo.png"
+
+

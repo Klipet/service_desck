@@ -8,12 +8,34 @@ class NewTicketModelUI {
   String? tehnicianResponsabil;
   String? modululSoftware;
   String? telefonDeContact;
-  String? rezultatulContactarii;
+  bool? rezultatulContactarii;
   DateTime? dataSiOraContactarii;
   DateTime? recontactareProgramata;
   String? categorieSolicitare;
   String? subcategorieSolicitare;
   String? tipSolicitare;
+  bool inregistratInBugTraker = false;
+  String idBugTraker = '';
+  String subiectulSolicitarii = '';
+  String descriere = '';
+}
+
+class NewTicketModelPost {
+  int? tipulSolicitarii;
+  int? statut;
+  int? regim;
+  int? prioritate;
+  int? platforma;
+  int? grupa;
+  int? tehnicianResponsabil;
+  int? modululSoftware;
+  int? telefonDeContact;
+  bool? rezultatulContactarii;
+  DateTime? dataSiOraContactarii;
+  DateTime? recontactareProgramata;
+  int? categorieSolicitare;
+  int? subcategorieSolicitare;
+  int? tipSolicitare;
   bool inregistratInBugTraker = false;
   String idBugTraker = '';
   String subiectulSolicitarii = '';

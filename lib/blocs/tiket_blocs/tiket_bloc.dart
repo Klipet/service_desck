@@ -113,6 +113,7 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
         prymoryTiketId: event.primoryTiket,
         secindTiketId: event.secondariTikets,
       );
+
       final result = await ticketService.menageTickets(apiKey: apiKey, request: request,);
       emit(TicketMargetSuccess(result));
 

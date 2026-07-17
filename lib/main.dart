@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -38,7 +39,7 @@ Future<void> main() async {
     await windowManager.show();
     await windowManager.focus();
   });
-
+  NotificationWindows();
   final ticketBloc = TicketBloc(ticketService: TicketService(), userRepository: UserRepository())..add(LoadTickets());
   final hub = HubConnecterR.init(ticketBloc);
   // unawaited — не блокируем запуск приложения
@@ -88,6 +89,7 @@ class MyApp extends StatelessWidget {
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
+              FlutterQuillLocalizations.delegate,
             ],
             builder: (context, child) {
               return ResponsiveBreakpoints.builder(

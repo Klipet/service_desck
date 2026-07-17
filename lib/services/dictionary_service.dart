@@ -9,7 +9,7 @@ class DictionaryService {
   Future<DictionariesResponse> getAllDictionaries({required String apiKey}) async {
 
     final response = await http.get(
-      Uri.parse('$url/TotalTypeControler/TotalType'), // замени на реальный путь
+      Uri.parse('$url/TotalType'), // замени на реальный путь
       headers: {"Content-Type": "application/json", "X-API-KEY": apiKey},
     );
 

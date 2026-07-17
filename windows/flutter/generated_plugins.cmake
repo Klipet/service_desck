@@ -3,15 +3,19 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  desktop_drop
+  file_selector_windows
   flutter_localization
   flutter_platform_alert
   isar_flutter_libs
   screen_retriever_windows
+  url_launcher_windows
   window_manager
   windows_notification
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  jni
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

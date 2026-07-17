@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:windows_notification/notification_message.dart';
 import 'package:windows_notification/windows_notification.dart';
 
@@ -10,6 +12,15 @@ final _winNotify = WindowsNotification(
 );
 class NotificationWindows{
 
+  String getImagePath() {
+    // Папка, где лежит exe
+    final exeDir = File(Platform.resolvedExecutable).parent.path;
+    final imagePath = '$exeDir\\data\\flutter_assets\\assets\\image\\big_logo.png';
+
+    // Toast XML требует file:/// с прямыми слэшами
+    final uriPath = imagePath.replaceAll('\\', '/');
+    return 'file:///$uriPath';
+  }
 
 
   void showTicketNotification(TicketResponse ticket) {
@@ -67,11 +78,12 @@ class NotificationWindows{
 
   void showNotificationConnect(String state) {
 
+    final imageSrc = getImagePath();
     final template = '''
 <toast>
   <visual>
     <binding template="ToastGeneric">
-      <image src="D:\\AppProject\\service_desk\\assets\\image\\big_logo.png" placement="appLogoOverride" hint-crop="circle"/>
+      <image src="$imageSrc" placement="appLogoOverride" hint-crop="circle"/>
       <text>Сервис SignalR</text>
       <text>Текуший Статус: ${state}</text>
       <text placement="attribution">ServiceDesk</text>
