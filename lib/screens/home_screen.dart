@@ -123,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   items: _navItems,
                   userName: _user?.userName ?? '',
                   selectedIndex: currentPage,
-                  onItemSelected: (i) => navigationProvider.goToPage(i),
+                  onItemSelected: (i) => navigationProvider.goToPageAndDestroy(i),
                 ),
                 Expanded(                       // ← PageView занимает остаток
                   child: PageView(

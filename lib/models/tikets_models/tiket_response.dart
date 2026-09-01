@@ -1,4 +1,5 @@
 import 'package:service_desk/models/tikets_files/tiket_files_response.dart';
+import 'package:service_desk/models/tikets_models/tiket_phone_model.dart';
 
 import '../ticket_message/ticket_comment_model.dart';
 import '../tikets_solutions/tiket_solution_response.dart';
@@ -41,6 +42,7 @@ class TicketResponse {
   final List<TicketFileResponse> files;
   final List<TicketSolutionResponse> solution;
   final List<TicketMessageModel> comment;
+  final List<TicketPhoneModel> phoneTicket;
 
   TicketResponse({
     required this.id,
@@ -80,6 +82,7 @@ class TicketResponse {
     required this.files,
     required this.solution,
     required this.comment,
+    required this.phoneTicket
   });
 
   factory TicketResponse.fromJson(Map<String, dynamic> json) {
@@ -132,10 +135,15 @@ class TicketResponse {
           : (json['solution'] as List)
           .map((e) => TicketSolutionResponse.fromJson(e))
           .toList(),
-      comment: json['comment'] == null
+      comment: json['message'] == null
           ? []
-          : (json['comment'] as List)
+          : (json['message'] as List)
           .map((e) => TicketMessageModel.fromJson(e))
+          .toList(),
+      phoneTicket: json['phones'] == null
+          ? []
+          : (json['phones'] as List)
+          .map((e) => TicketPhoneModel.fromJson(e))
           .toList(),
     );
   }

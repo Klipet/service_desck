@@ -110,28 +110,19 @@ class TicketGridWidget extends DataGridSource{
         // Булевые поля — иконка
         if (cell.columnName == 'checkbox') {
           return GestureDetector(
-            onTap: () => toggleRow(id), // 👈
+            onTap: () => toggleRow(id),
             child: Container(
               decoration: BoxDecoration(
-                  border: Border(
-                      right: BorderSide(
-                          color: AppColors.borderCardColor,
-                          width: 1.w
-                      ),
-                      left: BorderSide(
-                          color: AppColors.borderCardColor,
-                          width: 1.w
-                      ),
-                      bottom: BorderSide(
-                      color: AppColors.borderCardColor,
-                      width: 1.w
-                  )
-                  )
+                border: Border(
+                  right: BorderSide(color: AppColors.borderCardColor, width: 1.w),
+                  left: BorderSide(color: AppColors.borderCardColor, width: 1.w),
+                  bottom: BorderSide(color: AppColors.borderCardColor, width: 1.w),
+                ),
               ),
               alignment: Alignment.center,
               child: SvgPicture.asset(
                 isSelected
-                    ? 'assets/image/tool_bar_ticket/checkbox.svg'  // 👈
+                    ? 'assets/image/tool_bar_ticket/checkbox.svg'
                     : 'assets/image/tool_bar_ticket/checkbox_false.svg',
                 width: 16.w,
                 height: 16.h,

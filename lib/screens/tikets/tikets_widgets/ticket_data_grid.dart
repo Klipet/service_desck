@@ -113,6 +113,13 @@ class _TicketDataGridState extends State<TicketDataGrid> {
           widget.onColumnResized(details.column.columnName, details.width);
           return true;
         },
+        onCellTap: (DataGridCellTapDetails details){
+          if (details.rowColumnIndex.rowIndex == 0) return;
+          final row = widget.dataSource.effectiveRows[details.rowColumnIndex.rowIndex - 1];
+          final id = row.getCells().firstWhere((c) => c.columnName == 'id').value as int;
+          widget.dataSource.toggleRow(id);
+        },
+
         onColumnDragging: (details) {
           if (details.action == DataGridColumnDragAction.dropped &&
               details.to != null) {

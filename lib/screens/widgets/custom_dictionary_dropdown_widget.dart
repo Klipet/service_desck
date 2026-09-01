@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../const/const_colors.dart';
-import '../../models/dictionary_item_model.dart';
+import '../../models/dictionaries_items/dictionary_item_model.dart';
 
 class CustomDictionaryDropdown extends StatefulWidget {
   final String hintText;

@@ -1,4 +1,8 @@
-import '../../models/dictionary_item_model.dart';
+import 'package:service_desk/models/dictionaries_items/phone_resault_item.dart';
+
+import '../../models/dictionaries_items/catigory_item.dart';
+import '../../models/dictionaries_items/dictionary_item_model.dart';
+import '../../models/dictionaries_items/work_space_item.dart';
 import '../../services/dictionary_service.dart';
 
 class DictionariesRepository {
@@ -10,8 +14,10 @@ class DictionariesRepository {
   List<DictionaryItem> _tiketState = [];
   List<DictionaryItem> _tiketPreority = [];
   List<DictionaryItem> _tiketMode = [];
-  List<DictionaryItem> _tiketCategory = [];
-  List<DictionaryItem> _tiketWorkSpace = [];
+  List<CategoryItem> _tiketCategory = [];
+  List<WorkSpaceItem> _tiketWorkSpace = [];
+  List<PhoneResaultItem> _phoneResault = [];
+
 
   bool _isLoaded = false;
   Future<void>? _loadingFuture;
@@ -33,6 +39,7 @@ class DictionariesRepository {
     _tiketMode = result.tiketMode;
     _tiketCategory = result.tiketCategory;
     _tiketWorkSpace = result.tiketWorkSpace;
+    _phoneResault = result.phoneResault;
 
     _isLoaded = true;
   }
@@ -41,8 +48,9 @@ class DictionariesRepository {
   List<DictionaryItem> get tiketState => _tiketState;
   List<DictionaryItem> get tiketPreority => _tiketPreority;
   List<DictionaryItem> get tiketMode => _tiketMode;
-  List<DictionaryItem> get tiketCategory => _tiketCategory;
-  List<DictionaryItem> get tiketWorkSpace => _tiketWorkSpace;
+  List<CategoryItem> get tiketCategory => _tiketCategory;
+  List<WorkSpaceItem> get tiketWorkSpace => _tiketWorkSpace;
+  List<PhoneResaultItem> get phoneResault => _phoneResault;
 
   Future<void> refresh({required String apiKey}) async {
     _isLoaded = false;

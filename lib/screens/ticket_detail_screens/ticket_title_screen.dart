@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:service_desk/const/const_colors.dart';
 import 'package:service_desk/models/tikets_models/tiket_response.dart';
 
-import '../../models/dictionary_item_model.dart';
+import '../../models/dictionaries_items/dictionary_item_model.dart';
 import '../widgets/custom_dictionary_dropdown_widget.dart';
 
 class TicketTitleScreen extends StatefulWidget {

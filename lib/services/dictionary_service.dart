@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../const/const_app.dart';
-import '../models/dictionary_item_model.dart';
+import '../models/dictionaries_items/dictionary_item_model.dart';
 
 class DictionaryService {
   Future<DictionariesResponse> getAllDictionaries({required String apiKey}) async {

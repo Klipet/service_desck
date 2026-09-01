@@ -3,11 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:service_desk/const/const_colors.dart';
 import 'package:service_desk/models/company_model.dart';
+import 'package:service_desk/models/dictionaries_items/work_space_item.dart';
 import 'package:service_desk/models/new_ticket_models/new_ticket_model_ui.dart';
 import 'package:service_desk/screens/ticket_detail_screens/tiket_form_detail.dart';
 
 import '../../data_base/repository/dictionaries_repository.dart';
-import '../../models/dictionary_item_model.dart';
+import '../../models/dictionaries_items/dictionary_item_model.dart';
+import '../../models/tikets_models/tiket_phone_model.dart';
 import '../../models/tikets_models/tiket_post_model.dart';
 import '../../models/tikets_models/tiket_response.dart';
 import '../../models/users_models/user_model.dart';
@@ -18,7 +20,10 @@ class TicketFormScreen extends StatefulWidget {
   final TicketResponse? ticket; // null = пустая форма
   final void Function(TicketPostModel data)? onSubmit;
   final VoidCallback? onCancel;
+  final List<TicketPhoneModel> phones;
+
   final DictionariesRepository dictionariesRepo;
+
 //  final void Function(String name) searchCompany;
 
   const TicketFormScreen({
@@ -28,6 +33,7 @@ class TicketFormScreen extends StatefulWidget {
     this.onCancel,
 //    required this.searchCompany,
     required this.dictionariesRepo,
+    required this.phones,
   });
 
   @override
@@ -66,6 +72,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
     // Компания подтягивается сюда явно, так как AutocompleteBasicCompany
     // не сообщает своё значение напрямую в TicketFormDetail.
     _dataPost.companyId = _selectedCompany!.oid; // ПРОВЕРЬТЕ: поле companyId в CompanyModel
+    _dataPost.id = widget.ticket?.id ?? 0;
     _dataPost.dataModefire = DateTime.now();
     if (!_isEditing) {
       _dataPost.dataCreted = DateTime.now();
@@ -160,28 +167,29 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
              // SingleChildScrollView(
                // child:
                 TicketFormDetail(
-                  ticketResponse: widget.ticket,
-                  searchCompany: _selectedCompany,
+                  // Получаем из Widget
                   onPlatformSelected: (item) => _dataPost.platformId = item.oid,
                   onGroupSelected: (item) => _dataPost.workSpaceId = item.oid, // допущение: Grupa = workSpaceId
-                  onPhoneChanged: (v) => _dataPost.phone = v ,
-                  onResultPhoneChanged: (v) => _dataPost.resaultPhone = v ?? false,
-                  onDataPhoneChanged: (v) => _dataPost.dataPhone = v,
-                  onDateSecondPhoneChanged: (v) => _dataPost.dateSecondPhone = v,
                   onCategorySelected: (item) => _dataPost.categoryId = item.oid,
                   onSubCategorySelected: (item) => _dataPost.subCategoryId = item.oid,
                   onBugTransferChanged: (v) => _dataPost.bugTransfer = v ?? false,
                   onBugNumberChanged: (v) => _dataPost.bugNumber = v,
                   onTitleChanged: (v) => _dataPost.title = v,
                   onDescriptionChanged: (v) => _dataPost.description = v,
+                  onUserResponsable: (UserItem value) {  },
+                  onPhonesChanged: (List<TicketPhoneModel> value) {  },
+
+                  // Передаем в widget!!!!!!
+                  ticketResponse: widget.ticket,
+                  phones: widget.phones,
+                  searchCompany: _selectedCompany,
                   dictionariesRepo:  widget.dictionariesRepo,
                   platforms: _selectedCompany?.platforms ?? [],
                   onAuthorChanged: (author) => _dataPost.authorId = author.oid,
-                  technicians: [],
-                  onUserResponsable: (UserModel value) {  },
-                ),
+                //  technicians: widget.ticket?.userId,
+
               ),
-          //  ),
+            ),
           ),
           // ---- Кнопки Anulează / Înregistrează ----
           Container(
@@ -202,7 +210,11 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
                         borderRadius: BorderRadius.circular(6.r),
                       ),
                     ),
-                    child: const Text('Anulează'),
+                    child: Text('Anulează', style: GoogleFonts.poppins(
+                      color: AppColors.textTitleFl,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15.sp,
+                    ),),
                   ),
                   SizedBox(width: 12.w),
                   ElevatedButton(
@@ -216,7 +228,10 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text('Înregistrează'),
+                    child: Text('Înregistrează', style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15.sp,
+                    ),),
                   ),
                 ],
               ),

@@ -1,10 +1,16 @@
+import 'package:service_desk/models/dictionaries_items/catigory_item.dart';
+import 'package:service_desk/models/dictionaries_items/phone_resault_item.dart';
+
+import 'work_space_item.dart';
+
 class DictionaryItem {
   final int oid;
   final String name;
   final bool active;
   final DateTime? dateCreated;
   final DateTime? dateModifire;
-  final List<SubCategory?>? subCetegory;
+
+
 
   DictionaryItem({
     required this.oid,
@@ -12,7 +18,6 @@ class DictionaryItem {
     required this.active,
     this.dateCreated,
     this.dateModifire,
-    this.subCetegory,
   });
 
   factory DictionaryItem.fromJson(Map<String, dynamic> json) {
@@ -22,12 +27,7 @@ class DictionaryItem {
       active: json['active'] as bool? ?? false,
       dateCreated: _parseDate(json['dateCreated']),
       dateModifire: _parseDate(json['dateModifire']),
-      subCetegory: (json['subCategories'] as List<dynamic>?)
-          ?.map((e) => e == null
-          ? null
-          : SubCategory.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
+   );
   }
 
   Map<String, dynamic> toJson() {
@@ -45,31 +45,6 @@ class DictionaryItem {
       'DictionaryItem(oid: $oid, name: $name, active: $active)';
 }
 
-class SubCategory {
-  final int oid;
-  final String name;
-  final bool active;
-  final DateTime? dateCreated;
-  final DateTime? dateModifire;
-
-  SubCategory({
-    required this.oid,
-    required this.name,
-    required this.active,
-    this.dateCreated,
-    this.dateModifire,
-  });
-
-  factory SubCategory.fromJson(Map<String, dynamic> json) {
-    return SubCategory(
-      oid: json['oid'] as int,
-      name: json['name'] as String? ?? '',
-      active: json['active'] as bool? ?? false,
-      dateCreated: _parseDate(json['dateCreated']),
-      dateModifire: _parseDate(json['dateModifire']),
-    );
-  }
-}
 
 DateTime? _parseDate(dynamic value) {
   if (value == null) return null;
@@ -88,8 +63,9 @@ class DictionariesResponse {
   final List<DictionaryItem> tiketState;
   final List<DictionaryItem> tiketPreority;
   final List<DictionaryItem> tiketMode;
-  final List<DictionaryItem> tiketCategory;
-  final List<DictionaryItem> tiketWorkSpace;
+  final List<CategoryItem> tiketCategory;
+  final List<WorkSpaceItem> tiketWorkSpace;
+  final List<PhoneResaultItem> phoneResault;
 
   DictionariesResponse({
     required this.tiketType,
@@ -98,6 +74,7 @@ class DictionariesResponse {
     required this.tiketMode,
     required this.tiketCategory,
     required this.tiketWorkSpace,
+    required this.phoneResault,
   });
 
   factory DictionariesResponse.fromJson(Map<String, dynamic> json) {
@@ -107,14 +84,35 @@ class DictionariesResponse {
           .map((e) => DictionaryItem.fromJson(e as Map<String, dynamic>))
           .toList();
     }
+    List<WorkSpaceItem> parseWorkSpaces(String key) {
+      final raw = json[key] as List<dynamic>? ?? [];
+      return raw
+          .map((e) => WorkSpaceItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+
+    List<PhoneResaultItem> parsePhoneResault(String key) {
+      final raw = json[key] as List<dynamic>? ?? [];
+      return raw
+          .map((e) => PhoneResaultItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+
+    List<CategoryItem> parseCategories(String key) {
+      final raw = json[key] as List<dynamic>? ?? [];
+      return raw
+          .map((e) => CategoryItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
 
     return DictionariesResponse(
       tiketType: parseList('tiketType'),
       tiketState: parseList('tiketState'),
       tiketPreority: parseList('tiketPreority'),
       tiketMode: parseList('tiketMode'),
-      tiketCategory: parseList('tiketCategory'),
-      tiketWorkSpace: parseList('tiketWorkSpace'),
+      tiketCategory: parseCategories('tiketCategory'),
+      tiketWorkSpace: parseWorkSpaces('tiketWorkSpace'),
+      phoneResault: parsePhoneResault('phoneResault'),
     );
   }
 }
