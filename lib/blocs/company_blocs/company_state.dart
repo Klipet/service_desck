@@ -25,3 +25,27 @@ class CompanyError extends CompanyState {
   @override
   List<Object?> get props => [message];
 }
+
+class CompanyStatesLoaded extends CompanyState {
+  final List<CompanyStateModel> states;
+  CompanyStatesLoaded(this.states);
+
+  @override
+  List<Object?> get props => [states];
+}
+
+class CompanyCreated extends CompanyState {
+  final CompanyModel company;
+  CompanyCreated(this.company);
+
+  @override
+  List<Object?> get props => [company];
+}
+
+class CompanyUpdated extends CompanyState {
+  final CompanyModel company;
+  CompanyUpdated(this.company);
+
+  @override
+  List<Object?> get props => [company];
+}

@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:service_desk/const/const_colors.dart';
 import 'package:service_desk/data_base/data_models/user_model_db.dart';
 import 'package:service_desk/packeges/custom_title_bar.dart';
-import 'package:service_desk/screens/settings_screen.dart';
 import 'package:service_desk/screens/tikets/ticket_table_screen.dart';
 
 
@@ -15,6 +14,8 @@ import '../packeges/costom_nav/costom_sidebar.dart';
 import '../packeges/costom_nav/icon_nav.dart';
 import '../packeges/costom_nav/nav_item.dart';
 import '../utils/navigator_provider.dart';
+import 'company_screens/company_screen.dart';
+import 'setting_screens/settings_screen.dart';
 import 'ticket_detail_screens/ticket_detail_page.dart';
 import 'dashboard_screens/dashboard_screen.dart';
 import 'my_tickets_screen.dart';
@@ -151,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 24),
-                        child: TicketDetailPageUI(),
+                        child: CompanyScreen(),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 24),

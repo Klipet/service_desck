@@ -4,7 +4,6 @@ import 'package:meta/meta.dart';
 import 'package:service_desk/models/company_model.dart';
 
 import '../../data_base/user_repository.dart';
-import '../../services/client_service.dart';
 import '../../services/company_service.dart';
 
 part 'company_event.dart';
@@ -17,6 +16,61 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
     on<FeatCompanyEvent>(_onFeat);
     on<SearchCompanyEvent>(_onSearch);
     on<ClearCompanyEvent>(_onClear);
+    on<LoadAllCompaniesEvent>(_onLoadAll);
+    on<LoadCompanyStatesEvent>(_onLoadStates);
+    on<CreateCompanyEvent>(_onCreate);
+    on<UpdateCompanyEvent>(_onUpdate);
+  }
+
+  Future<void> _onLoadAll(
+      LoadAllCompaniesEvent event, Emitter<CompanyState> emit) async {
+    emit(CompanyLoading());
+    try {
+      final companies = await _service.getAllCompanies(apiKey: event.apiKey);
+      emit(CompanyLoaded(companies));
+    } catch (e) {
+      emit(CompanyError(e.toString()));
+    }
+  }
+
+  Future<void> _onLoadStates(
+      LoadCompanyStatesEvent event, Emitter<CompanyState> emit) async {
+    try {
+      final states = await _service.getCompanyStates(apiKey: event.apiKey);
+      emit(CompanyStatesLoaded(states));
+    } catch (e) {
+      emit(CompanyError(e.toString()));
+    }
+  }
+
+  Future<void> _onCreate(
+      CreateCompanyEvent event, Emitter<CompanyState> emit) async {
+    emit(CompanyLoading());
+    try {
+      final company = await _service.createCompany(
+        apiKey: event.apiKey,
+        name: event.name,
+        companyStateOid: event.companyStateOid,
+        idnp: event.idnp,
+      );
+      emit(CompanyCreated(company));
+    } catch (e) {
+      emit(CompanyError(e.toString()));
+    }
+  }
+
+  Future<void> _onUpdate(
+      UpdateCompanyEvent event, Emitter<CompanyState> emit) async {
+    emit(CompanyLoading());
+    try {
+      final company = await _service.updateCompany(
+        apiKey: event.apiKey,
+        company: event.company,
+      );
+      emit(CompanyUpdated(company));
+    } catch (e) {
+      emit(CompanyError(e.toString()));
+    }
   }
 
   Future<void> _onFeat(

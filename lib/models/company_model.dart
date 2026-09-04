@@ -1,3 +1,5 @@
+import 'package:service_desk/models/dictionaries_items/dictionary_item_model.dart';
+
 import 'platform_model.dart';
 
 // -----------------------------------------------------------
@@ -164,8 +166,8 @@ class CompanyModel {
       oid: json['oid'] as int,
       name: json['name'] as String,
       idnp: json['idnp'] as String?,
-      companyStateOid: json['companyStateOid'] as int,
-      companyStateName: json['companyStateName'] as String,
+      companyStateOid: json['comapnyStateOid'] as int? ?? 0,
+      companyStateName: json['comapnyStateName'] as String? ?? '',
       active: json['active'] as bool,
       dateModifire: DateTime.parse(json['dateModifire'] as String),
       dateCreated: DateTime.parse(json['dateCreated'] as String),
@@ -177,8 +179,8 @@ class CompanyModel {
     'oid': oid,
     'name': name,
     'idnp': idnp,
-    'companyStateOid': companyStateOid,
-    'companyStateName': companyStateName,
+    'comapnyStateOid': companyStateOid,
+    'comapnyStateName': companyStateName,
     'active': active,
     'dateModifire': dateModifire.toIso8601String(),
     'dateCreated': dateCreated.toIso8601String(),
@@ -191,4 +193,26 @@ class CompanyModel {
         .map((e) => CompanyModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+}
+
+// -----------------------------------------------------------
+// CompanyState (справочник статусов компании)
+// -----------------------------------------------------------
+class CompanyStateModel {
+  final int oid;
+  final String name;
+
+  const CompanyStateModel({required this.oid, required this.name});
+
+  factory CompanyStateModel.fromJson(Map<String, dynamic> json) {
+    return CompanyStateModel(
+      oid: json['oid'] as int,
+      name: json['name'] as String,
+    );
+  }
+}
+
+extension CompanyStateModelToItem on CompanyStateModel {
+  DictionaryItem toDictionaryItem() =>
+      DictionaryItem(oid: oid, name: name, active: true);
 }

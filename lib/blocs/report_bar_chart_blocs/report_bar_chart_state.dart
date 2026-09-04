@@ -1,9 +1,13 @@
+import 'package:equatable/equatable.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:service_desk/models/reports_model/chart_item.dart';
 
 import '../../models/reports_model/report_response_model.dart';
 
-abstract class ReportBarChartState{}
+abstract class ReportBarChartState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
 /// Начальное состояние
 class ReportInitial extends ReportBarChartState {}
@@ -15,10 +19,16 @@ class ReportLoading extends ReportBarChartState {}
 class ReportSuccess extends ReportBarChartState {
   final ReportResponseModel report;
   ReportSuccess(this.report);
+
+  @override
+  List<Object?> get props => [report];
 }
 
 /// Ошибка
 class ReportFailure extends ReportBarChartState {
   final String message;
   ReportFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
